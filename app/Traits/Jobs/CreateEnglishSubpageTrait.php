@@ -20,10 +20,9 @@ trait CreateEnglishSubpageTrait
             try {
                 MediaWikiApi::edit(sprintf('%s/en', $pageName))
                     ->withAuthentication()
-                    ->text(sprintf('{{:%s}}', $pageName))
+                    ->text(sprintf('#redirect [[tools:%s]]', $pageName))
                     ->csrfToken($csrfToken)
-                    ->createOnly()
-                    ->summary('Creating english subpage')
+                    ->summary('Redirecting english subpage')
                     ->request();
             } catch (GuzzleException $e) {
                 return;

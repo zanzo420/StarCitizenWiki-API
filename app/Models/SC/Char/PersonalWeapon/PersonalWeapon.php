@@ -25,7 +25,15 @@ class PersonalWeapon extends Item
         static::addGlobalScope(
             'type',
             static function (Builder $builder) {
-                $builder->where('type', 'WeaponPersonal');
+                $builder->where('type', 'WeaponPersonal')
+                    ->where('name', '<>', '<= PLACEHOLDER =>')
+                    ->where('class_name', 'NOT LIKE', '%test%')
+                    ->where('class_name', 'NOT LIKE', '%_default_%')
+                    ->where('class_name', 'NOT LIKE', '%_ai')
+                    ->where('class_name', 'NOT LIKE', '%_gungame%')
+                    ->where('class_name', 'NOT LIKE', '%_active%')
+                    ->where('class_name', 'NOT LIKE', '%_ea_%')
+                    ->where('class_name', 'NOT LIKE', '%placeholder%');
             }
         );
     }

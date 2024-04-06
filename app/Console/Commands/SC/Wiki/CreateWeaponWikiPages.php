@@ -4,21 +4,10 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\SC\Wiki;
 
-use App\Console\Commands\AbstractQueueCommand;
-use App\Jobs\Wiki\ApproveRevisions;
 use App\Models\SC\Char\PersonalWeapon\PersonalWeapon;
-use App\Traits\GetWikiCsrfTokenTrait;
-use App\Traits\Jobs\CreateEnglishSubpageTrait;
-use ErrorException;
-use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Support\Collection;
-use StarCitizenWiki\MediaWikiApi\Facades\MediaWikiApi;
 
-class CreateWeaponWikiPages extends AbstractQueueCommand
+class CreateWeaponWikiPages extends AbstractCreateWikiPage
 {
-    use GetWikiCsrfTokenTrait;
-    use CreateEnglishSubpageTrait;
-
     /**
      * The name and signature of the console command.
      *
@@ -33,87 +22,159 @@ class CreateWeaponWikiPages extends AbstractQueueCommand
      */
     protected $description = 'Create personal weapon as wikipages';
 
+    protected string $template = <<<'TEMPLATE'
+Das Item '''<ITEM NAME>''' ist ein Größe <ITEM SIZE> <ITEM CLASS><ITEM TYPE> hergestellt von [[{{subst:MFURN|<MANUFACTURER CODE>}}]].<DESCRIPTION DATA><ref name="ig3221">{{Cite game|build=[[Star Citizen Alpha 3.22.1|Alpha 3.22.1]]|accessdate=<CURDATE>}}</ref>
+== Beschreibung ==
+{{Item description}}
+== Itemports ==
+{{Item ports}}
+== Statistik ==
+{{Weapon damage stats}}
+== Erwerb ==
+{{Item availability}}
+== Model ==
+=== Varianten ===
+{{Item variants}}
+{{Quellen}}
+{{Navplate manufacturers|<MANUFACTURER CODE>}}
+{{Navplate personal weapons}}
+TEMPLATE;
+
+    protected array $typeMapping = [
+        'Knife' => 'Messer',
+        'Railgun' => 'Railgun',
+        'Missile Launcher' => 'Raketenwerfer',
+        'Grenade Launcher' => 'Granatwerfer',
+        'Grenade' => 'Granate',
+        'LMG' => 'leichtes Maschinengewehr',
+        'Pistol' => 'Pistole',
+        'Assault Rifle' => 'Sturmgewehr',
+        'Shotgun' => 'Schrotflinte',
+        'SMG' => 'Maschinenpistole',
+        'Sniper Rifle' => 'Scharfschützengewehr',
+        'Medical Device' => 'Medizinalgerät',
+        'Utility' => 'Hilfsmittel',
+        'Tractor Beam' => 'Traktorstrahl',
+        'Frag Pistol' => 'Splitterpistole',
+        'Toy Pistol' => 'Spielzeugpistole',
+        'Large' => 'große Waffe',
+        'Medium' => 'mittlere Waffe',
+        'Small' => 'kleine Waffe',
+        'Gadget' => 'Hilfsmittel',
+    ];
+
+    protected array $classMapping = [
+        'Ballistic' => 'Ballistik',
+        'Energy (Laser)' => 'Laserenergie',
+        'Laser' => 'Laser',
+        'Energy (Plasma)' => 'Plasmaenergie',
+        'Electron' => 'Elektronen',
+    ];
+
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
-        $weaponPersonals = PersonalWeapon::all();
-
-        $this->createProgressBar($weaponPersonals->count());
-
-        $weaponPersonals->each(function (PersonalWeapon $weaponPersonal) {
-            $this->uploadWiki($weaponPersonal);
-
-            $this->advanceBar();
-        });
-
-        if (config('services.wiki_approve_revs.access_secret') !== null) {
-            $this->approvePages($weaponPersonals->pluck('name'));
-        }
+        $this->withProgressBar(
+            PersonalWeapon::all(),
+            function (PersonalWeapon $item) {
+                $this->uploadWiki($item, 'Automatische Erstellung von Waffen');
+            }
+        );
 
         return 0;
     }
 
-    public function uploadWiki(PersonalWeapon $weaponPersonal): void
+    /**
+     * @param  PersonalWeapon  $model
+     */
+    protected function prepareTemplate($model): string
     {
-        // phpcs:disable
-        $text = <<<FORMAT
-{{Persönlichewaffe}}
-{{LokalisierteBeschreibung}}
+        $pageContent = $this->template;
+        $type = ($this->typeMapping[$model->weapon_type] ?? $this->typeMapping[$model->sub_type] ?? $model->sub_type);
 
-{{Handelswarentabelle
-|Name={{#invoke:Localized|getMainTitle}}
-|Kaufbar=1
-|Spalten=Händler,Ort,Preis,Spielversion
-|Limit=5
-}}
+        $pageContent = str_replace(
+            '<ITEM SIZE>',
+            (string) $model->size,
+            $pageContent
+        );
 
-{{Itemvarianten}}
+        $pageContent = str_replace(
+            '<ITEM CLASS>',
+            isset($this->classMapping[$model->weapon_class]) ? $this->classMapping[$model->weapon_class].' ' : '',
+            $pageContent
+        );
 
-== Quellen ==
-<references />
-{{Galerie}}
+        $pageContent = str_replace(
+            '<ITEM TYPE>',
+            $type,
+            $pageContent
+        );
 
-{{HerstellerNavplate|{{#show:{{#invoke:Localized|getMainTitle}}|?Hersteller#-}}}}
-FORMAT;
-        // phpcs:enable
+        $this->fixText($type, $pageContent);
 
-        try {
-            $token = $this->getCsrfToken('services.wiki_translations');
-            $response = MediaWikiApi::edit($weaponPersonal->name)
-                ->withAuthentication()
-                ->text($text)
-                ->csrfToken($token)
-                ->createOnly()
-                ->summary('Creating Weapon Personal Page')
-                ->request();
-        } catch (ErrorException | GuzzleException $e) {
-            $this->error($e->getMessage());
-
-            return;
+        if ($type === 'Messer') {
+            $pageContent = str_replace("== Statistik ==\n{{Weapon damage stats}}\n", '', $pageContent);
         }
 
-        $this->createEnglishSubpage($weaponPersonal->name, $token);
+        $descriptionDataTargets = [
+            'Magazine Size' => 'Magazingröße',
+            'Rate Of Fire' => 'Feuerrate',
+            'Effective Range' => 'effektive Reichweite',
+        ];
+        $dataFragments = [];
 
-        if ($response->hasErrors() && $response->getErrors()['code'] !== 'articleexists') {
-            $this->error(implode(', ', $response->getErrors()));
+        foreach ($descriptionDataTargets as $target => $desc) {
+            $data = $model->getDescriptionDatum($target);
+            if ($data !== null) {
+                $line = sprintf('%s von %s', $desc, $data);
+                if ($target === 'Magazine Size') {
+                    if ($data === 'Integrated Battery') {
+                        $line = 'integrierte Batterie';
+                    } else {
+                        $line .= ' Schuss';
+                    }
+                }
+                $dataFragments[] = $line;
+            }
         }
+
+        if (! empty($dataFragments)) {
+            $last = array_pop($dataFragments);
+            $dataFragments = sprintf(
+                ' Die Waffe besitzt eine %s, und eine %s.',
+                implode(', eine ', $dataFragments),
+                $last
+            );
+        } else {
+            $dataFragments = '';
+        }
+
+        $pageContent = str_replace(
+            '<DESCRIPTION DATA>',
+            $dataFragments,
+            $pageContent
+        );
+
+        $this->fixText($type, $pageContent);
+
+        return $pageContent;
     }
 
-    private function approvePages(Collection $data): void
+    /**
+     * @param  PersonalWeapon  $model
+     */
+    protected function getPageName($model): string
     {
-        $this->info('Approving Pages');
-        $this->createProgressBar($data->count());
+        return $model->name;
+    }
 
-        $data
-            ->each(function ($page) {
-                $this->loginWikiBotAccount('services.wiki_approve_revs');
-
-                dispatch(new ApproveRevisions([$page], false));
-                $this->advanceBar();
-            });
+    /**
+     * @param  PersonalWeapon  $model
+     */
+    protected function getManufacturerCode($model): string
+    {
+        return $model->manufacturer->code;
     }
 }

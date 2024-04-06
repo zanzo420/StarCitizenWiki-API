@@ -4,21 +4,10 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\SC\Wiki;
 
-use App\Console\Commands\AbstractQueueCommand;
-use App\Jobs\Wiki\ApproveRevisions;
 use App\Models\SC\Char\PersonalWeapon\Attachment;
-use App\Traits\GetWikiCsrfTokenTrait;
-use App\Traits\Jobs\CreateEnglishSubpageTrait;
-use ErrorException;
-use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Support\Collection;
-use StarCitizenWiki\MediaWikiApi\Facades\MediaWikiApi;
 
-class CreateWeaponAttachmentWikiPages extends AbstractQueueCommand
+class CreateWeaponAttachmentWikiPages extends AbstractCreateWikiPage
 {
-    use GetWikiCsrfTokenTrait;
-    use CreateEnglishSubpageTrait;
-
     /**
      * The name and signature of the console command.
      *
@@ -33,87 +22,102 @@ class CreateWeaponAttachmentWikiPages extends AbstractQueueCommand
      */
     protected $description = 'Create weapon attachments as wikipages';
 
+    protected string $template = <<<'TEMPLATE'
+Das Item '''<ITEM NAME>''' ist ein Größe <ITEM SIZE> <ITEM TYPE> hergestellt von [[{{subst:MFURN|<MANUFACTURER CODE>}}]].<ref name="ig3221">{{Cite game|build=[[Star Citizen Alpha 3.22.1|Alpha 3.22.1]]|accessdate=<CURDATE>}}</ref>
+== Beschreibung ==
+{{Item description}}
+== Erwerb ==
+{{Item availability}}
+{{Quellen}}
+{{Navplate manufacturers|<MANUFACTURER CODE>}}
+TEMPLATE;
+
+    protected array $typeMapping = [
+        'Ballistic Compensator' => 'ballistischer Kompensator',
+        'Flash Hider' => 'Mündungsfeuerdämpfer',
+        'Energy Stabilizer' => 'Energie-Stabilisator',
+        'Suppressor' => 'Schalldämpfer',
+        'Projection' => 'Projektionsvisier',
+        'Reflex' => 'Reflexvisier',
+        'Telescopic' => 'Zielfernrohr',
+        'Monitor' => 'Monitorvisier',
+        'Flashlight' => 'Taschenlampe',
+        'Laser Pointer' => 'Laserpointer',
+
+        // Raw Subtype
+        'Magazine' => 'Magazin',
+        'Utility' => 'Waffenaufsatz',
+        'IronSight' => 'Zielfernrohr',
+    ];
+
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
-        $attachments = Attachment::all();
-
-        $this->createProgressBar($attachments->count());
-
-        $attachments->each(function (Attachment $attachment) {
-            $this->uploadWiki($attachment);
-
-            $this->advanceBar();
-        });
-
-        if (config('services.wiki_approve_revs.access_secret') !== null) {
-            $this->approvePages($attachments->pluck('name'));
-        }
+        $this->withProgressBar(
+            Attachment::query()->whereIn('sub_type', [
+                'Magazine',
+                'Barrel',
+                'IronSight',
+                'Utility',
+                'BottomAttachment',
+            ])
+                ->get(),
+            function (Attachment $item) {
+                $this->uploadWiki($item, 'Automatische Erstellung von Waffenbefestigungen');
+            }
+        );
 
         return 0;
     }
 
-    public function uploadWiki(Attachment $attachment): void
+    /**
+     * @param  Attachment  $model
+     */
+    protected function prepareTemplate($model): string
     {
-        // phpcs:disable
-        $text = <<<FORMAT
-{{Waffenbefestigung}}
-{{LokalisierteBeschreibung}}
+        $pageContent = $this->template;
+        $type = ($this->typeMapping[$model->attachment_type] ?? $this->typeMapping[$model->sub_type] ?? $model->sub_type);
 
-{{Handelswarentabelle
-|Name={{#invoke:Localized|getMainTitle}}
-|Kaufbar=1
-|Spalten=Händler,Ort,Preis,Spielversion
-|Limit=5
-}}
-
-{{Standardausrüstung|Kategorie=Waffe|Query=[[Hat Unterobjekt.Position::+]]|Text=Waffen}}
-
-== Quellen ==
-<references />
-{{Galerie}}
-
-{{HerstellerNavplate|{{#show:{{#invoke:Localized|getMainTitle}}|?Hersteller#-}}}}
-FORMAT;
-        // phpcs:enable
-
-        try {
-            $token = $this->getCsrfToken('services.wiki_translations');
-            $response = MediaWikiApi::edit($attachment->name)
-                ->withAuthentication()
-                ->text($text)
-                ->csrfToken($token)
-                ->createOnly()
-                ->summary('Creating Weapon Attachment Page')
-                ->request();
-        } catch (ErrorException | GuzzleException $e) {
-            $this->error($e->getMessage());
-
-            return;
+        if ($model->size === null) {
+            $pageContent = str_replace(
+                'Größe <ITEM SIZE> ',
+                '',
+                $pageContent
+            );
+        } else {
+            $pageContent = str_replace(
+                '<ITEM SIZE>',
+                (string) ($model->getAttributes()['size'] ?? $model->size ?? 0),
+                $pageContent
+            );
         }
 
-        $this->createEnglishSubpage($attachment->name, $token);
+        $pageContent = str_replace(
+            '<ITEM TYPE> ',
+            $type.' ',
+            $pageContent
+        );
 
-        if ($response->hasErrors() && $response->getErrors()['code'] !== 'articleexists') {
-            $this->error(implode(', ', $response->getErrors()));
-        }
+        $this->fixText($type, $pageContent);
+
+        return $pageContent;
     }
 
-    private function approvePages(Collection $data): void
+    /**
+     * @param  Attachment  $model
+     */
+    protected function getPageName($model): string
     {
-        $this->info('Approving Pages');
-        $this->createProgressBar($data->count());
+        return $model->name;
+    }
 
-        $data
-            ->each(function ($page) {
-                $this->loginWikiBotAccount('services.wiki_approve_revs');
-
-                dispatch(new ApproveRevisions([$page], false));
-                $this->advanceBar();
-            });
+    /**
+     * @param  Attachment  $model
+     */
+    protected function getManufacturerCode($model): string
+    {
+        return $model->manufacturer->code;
     }
 }

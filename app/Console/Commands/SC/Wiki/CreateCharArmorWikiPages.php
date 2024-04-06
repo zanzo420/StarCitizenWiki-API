@@ -4,20 +4,15 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\SC\Wiki;
 
-use App\Console\Commands\AbstractQueueCommand;
-use App\Jobs\Wiki\ApproveRevisions;
 use App\Models\SC\Char\Clothing\Armor;
+use App\Models\SC\Char\Clothing\Clothes;
 use App\Traits\GetWikiCsrfTokenTrait;
 use App\Traits\Jobs\CreateEnglishSubpageTrait;
-use ErrorException;
-use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Support\Collection;
-use StarCitizenWiki\MediaWikiApi\Facades\MediaWikiApi;
 
-class CreateCharArmorWikiPages extends AbstractQueueCommand
+class CreateCharArmorWikiPages extends AbstractCreateWikiPage
 {
-    use GetWikiCsrfTokenTrait;
     use CreateEnglishSubpageTrait;
+    use GetWikiCsrfTokenTrait;
 
     /**
      * The name and signature of the console command.
@@ -33,90 +28,142 @@ class CreateCharArmorWikiPages extends AbstractQueueCommand
      */
     protected $description = 'Create char armor as wikipages';
 
+    protected string $template = <<<'TEMPLATE'
+Das Item '''<ITEM NAME>''' ist ein <ARMOR CLASS> <ITEM TYPE> hergestellt von [[{{subst:MFURN|<MANUFACTURER CODE>}}]].<VARIANTINFO><ref name="ig3221">{{Cite game|build=[[Star Citizen Alpha 3.22.1|Alpha 3.22.1]]|accessdate=<CURDATE>}}</ref>
+== Beschreibung ==
+{{Item description}}
+== Itemports ==
+{{Item ports}}
+== Erwerb ==
+{{Item availability}}
+== Model ==
+=== Varianten ===
+{{Item variants}}
+{{Quellen}}
+{{Navplate manufacturers|<MANUFACTURER CODE>}}
+TEMPLATE;
+
+    protected array $typeMapping = [
+        'Char_Armor_Arms' => 'Armpanzerung',
+        'Char_Armor_Torso' => 'Oberkörperpanzerung',
+        'Char_Armor_Legs' => 'Beinpanzerung',
+        'Char_Armor_Helmet' => 'Helm',
+        'Char_Armor_Backpack' => 'Rucksack',
+        'Char_Armor_Undersuit' => 'Unteranzug',
+        // Clothing
+        'Char_Clothing_Torso_1' => 'Jacke',
+        'Char_Clothing_Legs' => 'Hose',
+        'Char_Clothing_Torso_0' => 'Shirt',
+        'Char_Clothing_Feet' => 'Schuh',
+        'Char_Clothing_Hat' => 'Hut',
+        'Char_Clothing_Hands' => 'Handschuh',
+        'Char_Clothing_Torso_2' => 'Gürtel',
+        'Char_Clothing_Backpack' => 'Rucksack',
+    ];
+
+    protected array $subTypeMapping = [
+        'Heavy' => 'schwere(r)',
+        'Medium' => 'mittlere(r)',
+        'Light' => 'leichte(r)',
+        'Personal' => 'persönliche(r)',
+        // Clothing
+        'Female' => 'weibliche(r)',
+        'Male' => 'männliche(r)',
+        'Medical' => 'medizinische(r)',
+    ];
+
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
-        $charArmor = Armor::all();
-
-        $this->createProgressBar($charArmor->count());
-
-        $charArmor->each(function (Armor $armor) {
-            if (str_contains($armor->name, 'PLACEHOLDER') || str_contains($armor->name, '[PH]')) {
-                return;
+        $this->withProgressBar(
+            Armor::query()->where('uuid', '2c66dda7-ffab-4f55-9a2d-edc1f25d2ac7')->get(),
+            function (Armor $armor) {
+                $this->uploadWiki($armor, 'Automatische Erstellung von Kleidungs- und Rüstungsseiten');
             }
-
-            $this->uploadWiki($armor);
-
-            $this->advanceBar();
-        });
-
-        if (config('services.wiki_approve_revs.access_secret') !== null) {
-            $this->approvePages($charArmor->pluck('item.name'));
-        }
+        );
 
         return 0;
     }
 
-    public function uploadWiki(Armor $armor)
+    protected function prepareTemplate($model): string
     {
-        // phpcs:disable
-        $text = <<<FORMAT
-{{Rüstung}}
-{{LokalisierteBeschreibung}}
+        $name = $this->getPageName($model);
+        $type = $this->typeMapping[$model->type] ?? $model->type;
 
-{{Handelswarentabelle
-|Name={{#invoke:Localized|getMainTitle}}
-|Kaufbar=1
-|Spalten=Händler,Ort,Preis,Spielversion
-|Limit=5
-}}
-{{Rüstungskomponenten}}
+        $pageContent = $this->template;
 
-== Quellen ==
-<references />
-{{Galerie}}
+        $pageContent = str_replace(
+            '<ARMOR CLASS> ',
+            $model->sub_type === 'UNDEFINED'
+                ? ''
+                : strtolower($this->subTypeMapping[$model->sub_type] ?? $model->sub_type).' ',
+            $pageContent
+        );
 
-{{HerstellerNavplate|{{#show:{{#invoke:Localized|getMainTitle}}|?Hersteller#-}}}}
-FORMAT;
-        // phpcs:enable
+        $pageContent = str_replace(
+            '<ITEM TYPE>',
+            $type,
+            $pageContent
+        );
 
-        try {
-            $token = $this->getCsrfToken('services.wiki_translations');
-            $response = MediaWikiApi::edit($armor->name)
-                ->withAuthentication()
-                ->text($text)
-                ->csrfToken($token)
-                ->createOnly()
-                ->summary('Creating Armor Page')
-                ->request();
-        } catch (ErrorException | GuzzleException $e) {
-            $this->error($e->getMessage());
+        if (self::getSuffix($model) !== null || (str_contains($model->class_name, '_01_15') && str_contains($name, 'Black/Silver'))) {
+            $info = sprintf(" Dieses Item wird im Spiel als '''%s''' angezeigt.", $model->name);
 
-            return;
+            $pageContent = str_replace(
+                '<VARIANTINFO>',
+                $info,
+                $pageContent
+            );
+        } else {
+            $pageContent = str_replace('<VARIANTINFO>', '', $pageContent);
         }
 
-        $this->createEnglishSubpage($armor->name, $token);
+        $this->fixText($type, $pageContent, ['panzerung']);
 
-        if ($response->hasErrors() && $response->getErrors()['code'] !== 'articleexists') {
-            $this->error(implode(', ', $response->getErrors()));
+        if (str_contains($model->class_name, '_01_15') && str_contains($name, 'Black/Silver')) {
+            $pageContent .= "\n[[Category:Gegenstand mit nicht eindeutigem Namen im Spiel]]";
         }
+
+        return $pageContent;
     }
 
-    private function approvePages(Collection $data): void
+    protected static function getSuffix(Armor|Clothes $armor): ?string
     {
-        $this->info('Approving Pages');
-        $this->createProgressBar($data->count());
+        return match (true) {
+            str_contains($armor->class_name, '_hd_sec') => ' Hurston Security',
+            str_contains($armor->class_name, '_irn') => ' Iron',
+            str_contains($armor->class_name, '_gld') => ' Gold',
+            str_contains($armor->class_name, '_microtech') => ' microTech',
+            str_contains($armor->class_name, '_carrack') && ! str_contains($armor->name, 'Carrack') => ' Carrack Edition',
+            str_contains($armor->class_name, '_9tails') => ' (Nine Tails)',
+            str_contains($armor->class_name, '_xenothreat') => ' (Xenothreat)',
+            default => null
+        };
+    }
 
-        $data
-            ->each(function ($page) {
-                $this->loginWikiBotAccount('services.wiki_approve_revs');
+    protected function getPageName($model): string
+    {
+        $name = $model->name.(self::getSuffix($model) ?? '');
+        if (str_contains($model->class_name, '_01_15') && str_contains($name, 'Black/Silver')) {
+            $name = str_replace('Black', 'Tan', $name);
+        }
 
-                dispatch(new ApproveRevisions([$page], false));
-                $this->advanceBar();
-            });
+        if ($model->name === 'Venture Helmet White' && $model->class_name === 'rsi_explorer_armor_light_helmet_01_01_10') {
+            $name = str_replace('White', 'White/Red', $name);
+        }
+
+        return $name;
+    }
+
+    protected function getManufacturerCode($model): string
+    {
+        return $model->manufacturer->code;
+    }
+
+    public static function getNameForModel($model): string
+    {
+        return (new self())->getPageText($model);
     }
 }

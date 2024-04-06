@@ -27,11 +27,11 @@ class UploadWikiImage
     }
 
     /**
-     * @param string $filename Filename on the wiki
-     * @param string $url Remote url
-     * @param array $metadata Array containing 'sources', 'date', 'description', 'filesize' keys
-     * @param string $categories
+     * @param  string  $filename  Filename on the wiki
+     * @param  string  $url  Remote url
+     * @param  array  $metadata  Array containing 'sources', 'date', 'description', 'filesize' keys
      * @return false|string
+     *
      * @throws GuzzleException
      * @throws \JsonException
      */
@@ -76,9 +76,6 @@ class UploadWikiImage
     }
 
     /**
-     * @param array $data
-     *
-     * @return string
      * @throws GuzzleException
      * @throws ModelNotFoundException
      * @throws \JsonException
@@ -122,7 +119,7 @@ class UploadWikiImage
     {
         // Todo this should be dynamic
         return sprintf(
-            <<<TEXT
+            <<<'TEXT'
 =={{int:filedesc}}==
 {{Information
 |description={{de|1=%s}}
@@ -145,11 +142,6 @@ TEXT
 
     /**
      * Parse categories from string
-     *
-     * @param array $data
-     * @param Image $image
-     *
-     * @return string
      */
     private function createCommLinkImageCategories(array $data, Image $image): string
     {

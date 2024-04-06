@@ -17,7 +17,11 @@ class Attachment extends Item
             'type',
             static function (Builder $builder) {
                 $builder->where('type', 'WeaponAttachment')
-                    ->where('name', 'NOT LIKE', '%PLACEHOLDER%');
+                    ->where('name', '<>', '<= PLACEHOLDER =>')
+                    ->where('class_name', 'NOT LIKE', '%test%')
+                    ->where('class_name', 'NOT LIKE', 'weaponmount_%')
+                    ->where('class_name', 'NOT LIKE', '%ea_elim')
+                    ->where('class_name', '<>', 'grin_tool_01_mag');
             }
         );
     }
@@ -25,6 +29,11 @@ class Attachment extends Item
     public function getAttachmentPointAttribute()
     {
         return $this->getDescriptionDatum('Attachment Point');
+    }
+
+    public function getAttachmentTypeAttribute()
+    {
+        return $this->getDescriptionDatum('Type');
     }
 
     public function getSizeAttribute()

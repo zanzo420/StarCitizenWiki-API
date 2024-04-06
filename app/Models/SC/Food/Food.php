@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\SC\Food;
 
 use App\Models\SC\CommodityItem;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -15,7 +16,7 @@ class Food extends CommodityItem
     protected $table = 'sc_foods';
 
     protected $with = [
-        'effects'
+        'effects',
     ];
 
     protected $fillable = [
@@ -35,6 +36,25 @@ class Food extends CommodityItem
         'can_be_reclosed' => 'bool',
         'discard_when_consumed' => 'bool',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::addGlobalScope(
+            'only_available',
+            static function (Builder $builder) {
+                $builder->whereRelation('item', 'name', '<>', '<= PLACEHOLDER =>')
+                    ->whereRelation('item', 'class_name', 'NOT LIKE', '%test%')
+                    ->whereRelation('item', 'class_name', 'NOT LIKE', '%nodraw%')
+                    ->whereRelation('item', 'class_name', 'NOT LIKE', '%mannequin%')
+                    ->whereRelation('item', 'class_name', 'NOT LIKE', '%ai_exclusive%')
+                    ->whereRelation('item', 'class_name', 'NOT LIKE', 'animated%')
+                    ->whereRelation('item', 'class_name', 'NOT LIKE', '%_dmg_%');
+            }
+        );
+    }
+
     public function getRouteKey()
     {
         return $this->item_uuid;

@@ -4,21 +4,10 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\SC\Wiki;
 
-use App\Console\Commands\AbstractQueueCommand;
-use App\Jobs\Wiki\ApproveRevisions;
 use App\Models\SC\Food\Food;
-use App\Traits\GetWikiCsrfTokenTrait;
-use App\Traits\Jobs\CreateEnglishSubpageTrait;
-use ErrorException;
-use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Support\Collection;
-use StarCitizenWiki\MediaWikiApi\Facades\MediaWikiApi;
 
-class CreateFoodWikiPages extends AbstractQueueCommand
+class CreateFoodWikiPages extends AbstractCreateWikiPage
 {
-    use GetWikiCsrfTokenTrait;
-    use CreateEnglishSubpageTrait;
-
     /**
      * The name and signature of the console command.
      *
@@ -33,89 +22,72 @@ class CreateFoodWikiPages extends AbstractQueueCommand
      */
     protected $description = 'Create food wikipages';
 
+    protected string $template = <<<'TEMPLATE'
+Das Item '''<ITEM NAME>''' ist ein Lebensmittel<FOOD EFFECT>. Es wird hergestellt von [[{{subst:MFURN|<MANUFACTURER CODE>}}]].<ref name="ig3221">{{Cite game|build=[[Star Citizen Alpha 3.22.1|Alpha 3.22.1]]|accessdate=<CURDATE>}}</ref>
+== Beschreibung ==
+{{Item description}}
+== Erwerb ==
+{{Item availability}}
+== Quellen ==
+<references />
+{{Navplate food and drinks}}
+TEMPLATE;
+
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
-        $foods = Food::all();
-
-        $this->createProgressBar($foods->count());
-
-        $foods->each(function (Food $food) {
-            if (str_contains($food->item->name, 'PLACEHOLDER') || str_contains($food->item->name, '[PH]')) {
-                return;
+        $this->withProgressBar(
+            Food::query()
+                ->whereRelation('item', 'name', 'NOT LIKE', '%palceholder%')
+                ->whereRelation('item', 'class_name', 'NOT LIKE', '%test%')
+                ->get(),
+            function (Food $food) {
+                $this->uploadWiki($food, 'Automatische Erstellung von Lebensmitteln');
             }
-
-            $this->uploadWiki($food);
-
-            $this->advanceBar();
-        });
-
-        if (config('services.wiki_approve_revs.access_secret') !== null) {
-            $this->approvePages($foods->pluck('item.name'));
-        }
+        );
 
         return 0;
     }
 
-    public function uploadWiki(Food $food): void
+    /**
+     * @param  Food  $model
+     */
+    protected function prepareTemplate($model): string
     {
-        // phpcs:disable
-        $text = <<<FORMAT
-{{Lebensmittel}}
-{{LokalisierteBeschreibung}}
+        $pageContent = $this->template;
 
-{{Handelswarentabelle
-|Name={{#invoke:Localized|getMainTitle}}
-|Kaufbar=1
-|Spalten=Händler,Ort,Preis,Spielversion
-|Limit=5
-}}
-
-== Quellen ==
-<references />
-{{Galerie}}
-
-{{HerstellerNavplate|{{#show:{{#invoke:Localized|getMainTitle}}|?Hersteller#-}}}}
-FORMAT;
-        // phpcs:enable
-
-        try {
-            $token = $this->getCsrfToken('services.wiki_translations');
-            $response = MediaWikiApi::edit($food->item->name)
-                ->withAuthentication()
-                ->text($text)
-                ->csrfToken($token)
-                ->createOnly()
-                ->summary('Creating Food Page')
-                ->request();
-        } catch (ErrorException | GuzzleException $e) {
-            $this->error($e->getMessage());
-
-            return;
+        $effects = '';
+        if ($model->nutritional_density_rating && $model->hydration_efficacy_index) {
+            $effects = ', welches [[NDR|hunger]] und [[HEI|durst]] stillt';
+        } elseif ($model->hydration_efficacy_index) {
+            $effects = ', welches den [[HEI|durst]] stillt';
+        } elseif ($model->nutritional_density_rating) {
+            $effects = ', welches den [[NDR|hunger]] sättigt';
         }
 
-        $this->createEnglishSubpage($food->item->name, $token);
+        $pageContent = str_replace(
+            '<FOOD EFFECT>',
+            $effects,
+            $pageContent
+        );
 
-        if ($response->hasErrors() && $response->getErrors()['code'] !== 'articleexists') {
-            $this->error(implode(', ', $response->getErrors()));
-        }
+        return $pageContent;
     }
 
-    private function approvePages(Collection $data): void
+    protected function getPageName($model): string
     {
-        $this->info('Approving Pages');
-        $this->createProgressBar($data->count());
+        return $model->item->name;
+    }
 
-        $data
-            ->each(function ($page) {
-                $this->loginWikiBotAccount('services.wiki_approve_revs');
+    protected function getManufacturerCode($model): string
+    {
+        return $model->item->manufacturer->code;
+    }
 
-                dispatch(new ApproveRevisions([$page], false));
-                $this->advanceBar();
-            });
+    protected function getUUID($model): string
+    {
+        return $model->item->uuid;
     }
 }

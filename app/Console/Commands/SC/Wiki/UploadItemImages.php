@@ -38,7 +38,9 @@ class UploadItemImages extends AbstractQueueCommand
     protected $description = 'Uploads images of unpacked items';
 
     private Response $headResponse;
+
     private PendingRequest $http;
+
     private UploadWikiImage $upload;
 
     /**
@@ -48,11 +50,21 @@ class UploadItemImages extends AbstractQueueCommand
      * @var string[]
      */
     private $typeTranslations = [
-        'Arms' => 'Armpanzerung',
-        'Helmet' => 'Helm',
-        'Legs' => 'Beinpanzerung',
-        'Core' => 'Oberkörperpanzerung',
-        'Undersuit' => 'Unteranzug',
+        'Char_Armor_Arms' => 'Armpanzerung',
+        'Char_Armor_Torso' => 'Oberkörperpanzerung',
+        'Char_Armor_Legs' => 'Beinpanzerung',
+        'Char_Armor_Helmet' => 'Helm',
+        'Char_Armor_Backpack' => 'Rucksack',
+        'Char_Armor_Undersuit' => 'Unteranzug',
+        'Char_Clothing_Torso_1' => 'Jacke',
+        'Char_Clothing_Legs' => 'Hose',
+        'Char_Clothing_Torso_0' => 'Shirt',
+        'Char_Clothing_Feet' => 'Schuh',
+        'Char_Clothing_Hat' => 'Hut',
+        'Char_Clothing_Hands' => 'Handschuh',
+        'Char_Clothing_Torso_2' => 'Gürtel',
+        'Char_Clothing_Backpack' => 'Rucksack',
+
         'Cooler' => 'Kühler',
         'Power Plant' => 'Generator',
         'Quantum Drive' => 'Quantenantrieb',
@@ -98,42 +110,40 @@ class UploadItemImages extends AbstractQueueCommand
 
     /**
      * Upload images for armor parts, personal weapons and ship items
-     *
-     * @return int
      */
     public function handle(): int
     {
         $this->http = Http::baseUrl(config('services.item_thumbnail_url'));
         $this->upload = new UploadWikiImage(true);
 
-        $this->info('Uploading Char Armor Images...');
-        Armor::chunk(100, function (Collection $items) {
-            $this->work($items, true);
-        });
-
-        $this->info('Uploading Clothing Images...');
-        Clothes::chunk(100, function (Collection $items) {
-            $this->work($items, true);
-        });
-
-        $this->info('Uploading Weapon Personal Images...');
-        PersonalWeapon::chunk(100, function (Collection $items) {
-            $this->work($items);
-        });
-
-        $this->info('Uploading Weapon Attachment Images...');
-        Attachment::chunk(100, function (Collection $items) {
-            $this->work($items);
-        });
+//        $this->info('Uploading Char Armor Images...');
+//        $this->withProgressBar(Armor::all(), function (Armor $armor) {
+//            $this->work($armor, true);
+//        });
+//
+//        $this->info('Uploading Clothing Images...');
+//        $this->withProgressBar(Clothes::all(), function (Clothes $armor) {
+//            $this->work($armor, true);
+//        });
+//
+//        $this->info('Uploading Weapon Personal Images...');
+//        $this->withProgressBar(PersonalWeapon::all(), function (PersonalWeapon $armor) {
+//            $this->work($armor, true);
+//        });
+//
+//        $this->info('Uploading Weapon Attachment Images...');
+//        $this->withProgressBar(Attachment::all(), function (Attachment $armor) {
+//            $this->work($armor, true);
+//        });
 
         $this->info('Uploading Food Images...');
-        Food::chunk(100, function (Collection $items) {
-            $this->work($items);
+        $this->withProgressBar(Food::all(), function (Food $armor) {
+            $this->work($armor, true);
         });
 
         $this->info('Uploading Ship Item Images...');
-        VehicleItem::chunk(100, function (Collection $items) {
-                $this->work($items);
+        $this->withProgressBar(VehicleItem::all(), function (VehicleItem $armor) {
+            $this->work($armor, true);
         });
 
         $this->info('Done');
@@ -141,119 +151,100 @@ class UploadItemImages extends AbstractQueueCommand
         return 0;
     }
 
-    /**
-     * @param Collection $entries
-     * @param bool $normalizeCategory
-     */
-    private function work(Collection $entries, bool $normalizeCategory = false): void
+    private function work($item, bool $normalizeCategory = false): void
     {
-        $entries->each(function ($item) use ($normalizeCategory) {
-            if ($item instanceof CommodityItem) {
-                $item = $item->item;
+        if ($item instanceof CommodityItem) {
+            $item = $item->item;
+        }
+
+        $url = sprintf('%s.jpg', $item->uuid);
+
+        $this->headResponse = $this->http->head($url);
+        if (! $this->headResponse->successful()) {
+            return;
+        }
+
+        $name = preg_replace('/[^\w-]/', ' ', $item->name);
+        $name = trim(preg_replace('/\s+/', ' ', $name));
+
+        if ($item instanceof Clothing) {
+            $name = CreateCharArmorWikiPages::getNameForModel($item);
+        }
+
+        if (str_contains($name, '+')) {
+            $name = str_replace('+', ' (Plus)', $name);
+        }
+
+        $source = sprintf('%s%s', config('services.item_thumbnail_url'), $url);
+
+        $metadata = [
+            'filesize' => $this->headResponse->header('Content-Length'),
+            'date' => $this->headResponse->header('Last-Modified'),
+            'sources' => $source,
+        ];
+
+        $categories = [
+            sprintf('{{subst:MFURN|%s}}', $item->manufacturer->code),
+        ];
+
+        if ($normalizeCategory) {
+            $this->normalizeCategory($item, $name, $metadata, $categories);
+        } else {
+            $categories[] = $name;
+        }
+
+        if (! isset($metadata['description'])) {
+            $metadata['description'] = sprintf(
+                '[[%s]] vom Hersteller [[{{subst:MFURN|%s}}]]',
+                $name,
+                $item->manufacturer->code,
+            );
+        }
+
+        if (isset($this->typeTranslations[$item->type])) {
+            $categories[] = $this->typeTranslations[$item->type];
+
+            $type = $this->typeTranslations[$item->type];
+            if ($item->type === 'WeaponGun') {
+                $type = 'Fahrzeugwaffe';
             }
 
-            $url = sprintf('%s.jpg', $item->uuid);
+            $metadata['description'] = sprintf(
+                '%s [[%s]] vom Hersteller [[{{subst:MFURN|%s}}]]',
+                $type,
+                $name,
+                $item->manufacturer->code,
+            );
+        }
 
-            if (in_array($item->manufacturer->name, ['@LOC_PLACEHOLDER', 'Unknown Manufacturer'], true)) {
-                $item->manufacturer->name = 'Unbekannter Hersteller';
-            }
+        $categories = collect($categories)->map(function ($category) {
+            return sprintf('[[Kategorie:%s]]', $category);
+        })->implode("\n");
 
-            $this->headResponse = $this->http->head($url);
-            if (!$this->headResponse->successful()) {
-                return;
-            }
-
-            $source = sprintf('%s%s', config('services.item_thumbnail_url'), $url);
-
-            $metadata = [
-                'filesize' => $this->headResponse->header('Content-Length'),
-                'date' => $this->headResponse->header('Last-Modified'),
-                'sources' => $source,
-            ];
-
-            $categories = [
-                str_replace('[PH] ', '', $item->manufacturer->name),
-            ];
-
-            $name = preg_replace('/[^\w-]/', ' ', $item->name);
-
-            if ($normalizeCategory) {
-                $this->normalizeCategory($item, $name, $metadata, $categories);
-            } else {
-                $categories[] = $item->name;
-            }
-
-            if (!isset($metadata['description'])) {
-                $metadata['description'] = sprintf(
-                    '[[%s]] vom Hersteller [[%s]]',
-                    $item->name,
-                    str_replace('[PH] ', '', $item->manufacturer->name),
-                );
-            }
-
-            if (isset($this->typeTranslations[$item->type])) {
-                $categories[] = $this->typeTranslations[$item->type];
-
-                $type = $this->typeTranslations[$item->type];
-                if ($item->type === 'WeaponGun') {
-                    $type = 'Fahrzeugwaffe';
-                }
-
-                $metadata['description'] = sprintf(
-                    '%s [[%s]] vom Hersteller [[%s]]',
-                    $type,
-                    $item->name,
-                    str_replace('[PH] ', '', $item->manufacturer->name),
-                );
-            }
-
-            $name = trim(preg_replace('/\s+/', ' ', $name));
-
-            $categories = collect($categories)->map(function ($category) {
-                return sprintf('[[Kategorie:%s]]', $category);
-            })->implode("\n");
-
-            try {
-                $this->upload->upload(sprintf('%s.jpg', $name), $source, $metadata, $categories);
-            } catch (Exception $e) {
-                $this->error($e->getMessage());
-            }
-        });
+        try {
+            $this->upload->upload(sprintf('%s.jpg', $name), $source, $metadata, $categories);
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
     }
 
     /**
      * Removes the color from the items name
      * Adds categories and a description
      *
-     * @param CommodityItem $item
-     * @param string $name
-     * @param array $metadata
-     * @param array $categories
+     * @param  CommodityItem  $item
      */
     private function normalizeCategory($item, string $name, array &$metadata, array &$categories): void
     {
-        foreach (Clothing::$splits as $split) {
-            if (!Str::contains($name, $split)) {
-                continue;
-            }
+        if (isset($this->typeTranslations[$item->type])) {
+            $categories[] = $this->typeTranslations[$item->type];
 
-            $splitted = array_filter(explode($split, $name));
-            if (count($splitted) === 2) {
-                $categories[] = $splitted[0];
-            } else {
-                $categories[] = $item->name;
-            }
-
-            if (isset($this->typeTranslations[$split])) {
-                $categories[] = $this->typeTranslations[$split];
-
-                $metadata['description'] = sprintf(
-                    '%s [[%s]] vom Hersteller [[%s]]',
-                    $this->typeTranslations[$split],
-                    $item->name,
-                    $item->manufacturer->name,
-                );
-            }
+            $metadata['description'] = sprintf(
+                '%s [[%s]] vom Hersteller [[{{subst:MFURN|%s}}]]',
+                $this->typeTranslations[$item->type],
+                $name,
+                $item->manufacturer->code,
+            );
         }
     }
 }

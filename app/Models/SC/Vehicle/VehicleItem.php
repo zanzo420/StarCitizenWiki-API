@@ -18,43 +18,53 @@ class VehicleItem extends Item
         static::addGlobalScope(
             'type',
             static function (Builder $builder) {
-                $builder->whereIn('type', [
-                    'Arm',
-                    'Battery',
-                    'BombLauncher',
-                    'Cooler',
-                    'EMP',
-                    'ExternalFuelTank',
-                    'FlightController',
-                    'FuelIntake',
-                    'FuelTank',
-                    'MainThruster',
-                    'ManneuverThruster',
-                    'MiningArm',
-                    'Missile',
-                    'MissileLauncher',
-                    'Mount',
-                    'Paints',
-                    'PowerPlant',
-                    'QuantumDrive',
-                    'QuantumFuelTank',
-                    'QuantumInterdictionGenerator',
-                    'Radar',
-                    'SalvageModifier',
-                    'SelfDestruct',
-                    'Shield',
-                    'ToolArm',
-                    'TowingBeam',
-                    'TractorBeam',
-                    'Turret',
-                    'Turret',
-                    'TurretBase',
-                    'UtilityTurret',
-                    'WeaponDefensive',
-                    'WeaponGun',
-                    'WeaponMount',
-                    'WheeledController',
-                ]);
+                $builder->where('name', '<>', '<= PLACEHOLDER =>')
+                    ->where('class_name', 'NOT LIKE', '%test%')
+                    ->where('class_name', 'NOT LIKE', '%lowpoly%')
+                    ->where('class_name', 'NOT LIKE', '%dummy%')
+                    ->where('class_name', 'NOT LIKE', '%_mm')
+                    ->where('class_name', 'NOT LIKE', '%s%_idris_m')
+                    ->where('class_name', 'NOT LIKE', '%s%_turret')
+                    ->where('class_name', 'NOT LIKE', 'mrck_s05_orig_%') //MSD-543 Missile Rack
+                    ->where('class_name', 'NOT LIKE', 'mrck_s05_behr_quad_s03_a') //MSD-543 Missile Rack
+                    ->whereIn('type', [
+                        'Arm',
+                        'Battery',
+                        'BombLauncher',
+                        'Cooler',
+                        'EMP',
+                        'ExternalFuelTank',
+                        'FlightController',
+                        'FuelIntake',
+                        'FuelTank',
+                        'MainThruster',
+                        'ManneuverThruster',
+                        'MiningArm',
+                        'Missile',
+                        'MissileLauncher',
+                        'Mount',
+                        'Paints',
+                        'PowerPlant',
+                        'QuantumDrive',
+                        'QuantumFuelTank',
+                        'QuantumInterdictionGenerator',
+                        'Radar',
+                        'SalvageModifier',
+                        'SelfDestruct',
+                        'Shield',
+                        'ToolArm',
+                        'TowingBeam',
+                        'TractorBeam',
+                        'Turret',
+                        'Turret',
+                        'TurretBase',
+                        'UtilityTurret',
+                        'WeaponDefensive',
+                        'WeaponGun',
+                        'WeaponMount',
+                        'WeaponMining',
+                        'WheeledController',
+                    ]);
             }
         );
     }

@@ -4,21 +4,10 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\SC\Wiki;
 
-use App\Console\Commands\AbstractQueueCommand;
-use App\Jobs\Wiki\ApproveRevisions;
 use App\Models\SC\Vehicle\VehicleItem;
-use App\Traits\GetWikiCsrfTokenTrait;
-use App\Traits\Jobs\CreateEnglishSubpageTrait;
-use ErrorException;
-use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Support\Collection;
-use StarCitizenWiki\MediaWikiApi\Facades\MediaWikiApi;
 
-class CreateShipItemWikiPages extends AbstractQueueCommand
+class CreateShipItemWikiPages extends AbstractCreateWikiPage
 {
-    use GetWikiCsrfTokenTrait;
-    use CreateEnglishSubpageTrait;
-
     /**
      * The name and signature of the console command.
      *
@@ -33,122 +22,131 @@ class CreateShipItemWikiPages extends AbstractQueueCommand
      */
     protected $description = 'Create ship items as wikipages';
 
+    protected string $template = <<<'TEMPLATE'
+Das Item '''<ITEM NAME>''' ist ein Größe <ITEM SIZE><ITEM GRADE><ITEM CLASS><ITEM TYPE> hergestellt von [[{{subst:MFURN|<MANUFACTURER CODE>}}]].<ref name="ig3221">{{Cite game|build=[[Star Citizen Alpha 3.22.1|Alpha 3.22.1]]|accessdate=<CURDATE>}}</ref>
+== Beschreibung ==
+{{Item description}}
+== Erwerb ==
+{{Item availability}}
+== Standardausrüstung von ==
+{{Standardausrüstung}}
+{{Quellen}}
+{{Navplate manufacturers|<MANUFACTURER CODE>}}
+{{<ITEM TYPE> Navplate}}
+TEMPLATE;
+
+    protected array $typeMapping = [
+        'BombLauncher' => 'Bombenwerfer',
+        'Cooler' => 'Kühler',
+        'EMP' => 'EMP-Generator',
+        'Missile' => 'Rakete',
+        'MissileLauncher' => 'Raketenwerfer',
+        'PowerPlant' => 'Generator',
+        'QuantumDrive' => 'Quantenantrieb',
+        'QuantumInterdictionGenerator' => 'Quantum Enforcement Device',
+        'SalvageModifier' => 'Bergungsmodifikator',
+        'Shield' => 'Schildgenerator',
+        'TowingBeam' => 'Abschleppstrahl',
+        'TractorBeam' => 'Traktorstrahl',
+        'WeaponGun' => 'Fahrzeugwaffe',
+        'WeaponMining' => 'Bergbaulaser',
+        'WeaponDefensive' => 'Defensivmittel',
+    ];
+
+    protected array $classMappings = [
+        'Civilian' => 'Zivil',
+        'Competition' => 'Wettkampf',
+        'Military' => 'Militär',
+        'Industrial' => 'Industrie',
+        'Stealth' => 'Stealth',
+    ];
+
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
-        $items = VehicleItem::all();
-
-        $items = $items->filter(function (VehicleItem $item) {
-            return !str_contains(strtolower($item->name), 'placeholder');
-        });
-
-        $this->createProgressBar($items->count());
-
-        $items->each(function (VehicleItem $item) {
-            $this->uploadWiki($item);
-
-            $this->advanceBar();
-        });
-
-        if (config('services.wiki_approve_revs.access_secret') !== null) {
-            $this->approvePages($items->pluck('name'));
-        }
+        $this->withProgressBar(
+            VehicleItem::query()
+                ->whereIn('type', [
+                    'BombLauncher',
+                    'Cooler',
+                    'EMP',
+                    'Missile',
+                    'MissileLauncher',
+                    'PowerPlant',
+                    'QuantumDrive',
+                    'QuantumInterdictionGenerator',
+                    'SalvageModifier',
+                    'Shield',
+                    'TowingBeam',
+                    'TractorBeam',
+                    'WeaponGun',
+                    'WeaponMining',
+                    'Radar',
+                ])
+                ->get(),
+            function (VehicleItem $item) {
+                $this->uploadWiki($item, 'Automatische Erstellung von Fahrzeugitems');
+            }
+        );
 
         return 0;
     }
 
-    public function uploadWiki(VehicleItem $item): void
+    protected function prepareTemplate($model): string
     {
-        $template = $this->getTemplateType($item);
-        if ($template === null) {
-            return;
-        }
+        $pageContent = $this->template;
+        $type = ($this->typeMapping[$model->type] ?? $model->type);
 
-        // phpcs:disable
-        $text = <<<FORMAT
-{{{$template}}}
-{{LokalisierteBeschreibung}}
+        $pageContent = str_replace(
+            '<ITEM SIZE>',
+            $model->size.((! $model->grade && ! $model->class) ? ' ' : ''),
+            $pageContent
+        );
 
-{{Handelswarentabelle
-|Name={{#invoke:Localized|getMainTitle}}
-|Kaufbar=1
-|Spalten=Händler,Ort,Preis,Spielversion
-|Limit=5
-}}
+        $pageContent = str_replace(
+            '<ITEM GRADE>',
+            $model->grade ? ', Grad '.$model->grade.', ' : '',
+            $pageContent
+        );
 
-{{Standardausrüstung}}
+        $pageContent = str_replace(
+            '<ITEM CLASS>',
+            $model->class ? ($this->classMappings[$model->class] ?? $model->class).'-' : '',
+            $pageContent
+        );
 
-== Quellen ==
-<references />
-{{Galerie}}
+        $pageContent = str_replace(
+            '<ITEM TYPE> ',
+            $type.' ',
+            $pageContent
+        );
 
-{{HerstellerNavplate|{{#show:{{#invoke:Localized|getMainTitle}}|?Hersteller#-}}}}
-FORMAT;
-        // phpcs:enable
+        $this->fixText($type, $pageContent);
 
-        try {
-            $token = $this->getCsrfToken('services.wiki_translations');
-            $response = MediaWikiApi::edit($item->name)
-                ->withAuthentication()
-                ->text($text)
-                ->csrfToken($token)
-                ->createOnly()
-                ->summary('Creating Ship Item page')
-                ->request();
-        } catch (ErrorException | GuzzleException $e) {
-            $this->error($e->getMessage());
-
-            return;
-        }
-
-        $this->createEnglishSubpage($item->name, $token);
-
-        if ($response->hasErrors() && $response->getErrors()['code'] !== 'articleexists') {
-            $this->error(implode(', ', $response->getErrors()));
-        }
+        return $pageContent;
     }
 
-    private function getTemplateType(VehicleItem $item): ?string
+    /**
+     * @param  VehicleItem  $model
+     */
+    protected function getPageName($model): string
     {
-        if ($item->name !== '<= PLACEHOLDER =>') {
-            switch ($item->type) {
-                case 'WeaponGun':
-                    return 'Fahrzeugwaffe';
-                case 'MissileLauncher':
-                    return 'Raketenwerfer';
-                case 'Missile':
-                    return 'Rakete';
-                case 'Turret':
-                    return 'Waffenturm';
-                case 'WeaponMining':
-                    return 'Bergbaulaser';
-            }
+        $name = $model->name;
+
+        if (in_array($name, ['Liberator', 'Odyssey', 'Nova', 'Vulcan', 'Eclipse', 'Centurion', 'Citadel'])) {
+            $name = sprintf('%s (%s)', $name, ($this->typeMapping[$model->type] ?? $model->type));
         }
 
-        return match ($item->type) {
-            'Cooler' => 'Kühler',
-            'PowerPlant' => 'Generator',
-            'ShieldGenerator' => 'Schildgenerator',
-            'QuantumDrive' => 'Quantenantrieb',
-            default => null,
-        };
+        return $name;
     }
 
-    private function approvePages(Collection $data): void
+    /**
+     * @param  VehicleItem  $model
+     */
+    protected function getManufacturerCode($model): string
     {
-        $this->info('Approving Pages');
-        $this->createProgressBar($data->count());
-
-        $data
-            ->each(function ($page) {
-                $this->loginWikiBotAccount('services.wiki_approve_revs');
-
-                dispatch(new ApproveRevisions([$page], false));
-                $this->advanceBar();
-            });
+        return $model->manufacturer->code;
     }
 }
