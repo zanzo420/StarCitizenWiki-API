@@ -27,7 +27,7 @@ class Ammunition implements ShouldQueue
     public function handle(): void
     {
         /** @var \App\Models\SC\Ammunition\Ammunition $ammunition */
-        $ammunition = \App\Models\SC\Ammunition\Ammunition::query()->updateOrCreate([
+        $ammunition = \App\Models\SC\Ammunition\Ammunition::query()->withoutGlobalScopes()->updateOrCreate([
             'uuid' => $this->data['ammunition']['uuid'],
         ], [
             'size' => $this->data['ammunition']['size'],

@@ -9,6 +9,7 @@ use App\Models\SC\Item\ItemDescriptionData;
 use App\Models\SC\Shop\Shop;
 use App\Models\SC\Shop\ShopItem;
 use App\Models\System\Translation\AbstractHasTranslations as HasTranslations;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,6 +22,25 @@ abstract class CommodityItem extends HasTranslations
     protected $with = [
         'item',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::addGlobalScope(
+            'version',
+            static function (Builder $builder) {
+                $builder->whereRelation('item', 'version', config('api.sc_data_version'));
+            }
+        );
+
+        static::addGlobalScope(
+            'only_usable',
+            static function (Builder $builder) {
+                $builder->has('item');
+            }
+        );
+    }
 
     public function item(): BelongsTo
     {

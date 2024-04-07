@@ -78,7 +78,7 @@ TEMPLATE;
     public function handle(): int
     {
         $this->withProgressBar(
-            Armor::query()->where('uuid', '2c66dda7-ffab-4f55-9a2d-edc1f25d2ac7')->get(),
+            Armor::all(),
             function (Armor $armor) {
                 $this->uploadWiki($armor, 'Automatische Erstellung von Kleidungs- und Rüstungsseiten');
             }

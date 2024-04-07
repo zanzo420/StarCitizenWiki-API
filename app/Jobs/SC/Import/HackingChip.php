@@ -44,7 +44,7 @@ class HackingChip implements ShouldQueue
         $item = $parser->getData();
 
         /** @var \App\Models\SC\ItemSpecification\HackingChip $model */
-        \App\Models\SC\ItemSpecification\HackingChip::updateOrCreate([
+        \App\Models\SC\ItemSpecification\HackingChip::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'max_charges' => $item['max_charges'] ?? null,

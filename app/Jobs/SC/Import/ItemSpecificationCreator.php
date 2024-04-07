@@ -18,14 +18,14 @@ final class ItemSpecificationCreator
                 Clothing::dispatch($filePath);
                 break;
 
-            // Food
+                // Food
             case stripos($type, 'Bottle') !== false:
             case stripos($type, 'Food') !== false:
             case stripos($type, 'Drink') !== false:
                 Food::dispatch($filePath);
                 break;
 
-            // Personal Weapons
+                // Personal Weapons
             case stripos($type, 'WeaponPersonal') !== false:
                 if ($subType === 'Grenade') {
                     Grenade::dispatch($filePath);
@@ -42,12 +42,12 @@ final class ItemSpecificationCreator
                 HackingChip::dispatch($filePath);
                 break;
 
-            // Mining
+                // Mining
             case stripos($type, 'WeaponMining') !== false:
                 MiningLaser::dispatch($filePath);
                 break;
 
-            // Vehicle Items
+                // Vehicle Items
             case stripos($type, 'Arm') !== false:
             case stripos($type, 'Armor') !== false:
             case stripos($type, 'Battery') !== false:

@@ -16,12 +16,7 @@ class Attachment extends Item
         static::addGlobalScope(
             'type',
             static function (Builder $builder) {
-                $builder->where('type', 'WeaponAttachment')
-                    ->where('name', '<>', '<= PLACEHOLDER =>')
-                    ->where('class_name', 'NOT LIKE', '%test%')
-                    ->where('class_name', 'NOT LIKE', 'weaponmount_%')
-                    ->where('class_name', 'NOT LIKE', '%ea_elim')
-                    ->where('class_name', '<>', 'grin_tool_01_mag');
+                $builder->where('type', 'WeaponAttachment');
             }
         );
     }

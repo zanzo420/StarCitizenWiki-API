@@ -30,8 +30,6 @@ class MiningLaser implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
@@ -43,14 +41,15 @@ class MiningLaser implements ShouldQueue
     {
         try {
             $parser = new \App\Services\Parser\SC\MiningLaser($this->filePath, $labels);
-        } catch (FileNotFoundException | JsonException $e) {
+        } catch (FileNotFoundException|JsonException $e) {
             $this->fail($e);
+
             return;
         }
         $item = $parser->getData();
 
         /** @var \App\Models\SC\ItemSpecification\MiningLaser $model */
-        \App\Models\SC\ItemSpecification\MiningLaser::updateOrCreate([
+        \App\Models\SC\ItemSpecification\MiningLaser::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'power_transfer' => $item['power_transfer'] ?? null,

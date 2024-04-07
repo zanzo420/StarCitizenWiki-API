@@ -11,6 +11,7 @@ use App\Models\SC\Item\ItemSubType;
 use App\Models\SC\Item\ItemType;
 use App\Models\SC\Item\Tag;
 use App\Models\SC\Manufacturer;
+use App\Services\ManufacturerFixer;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -36,6 +37,12 @@ class Item implements ShouldQueue
      */
     public function handle(): void
     {
+        $manufacturer = ManufacturerFixer::getByName($this->data['manufacturer']['name']);
+        if ($manufacturer !== null) {
+            $this->data['manufacturer']['name'] = $manufacturer['name_fix'] ?? $manufacturer['name'];
+            $this->data['manufacturer']['code'] = $manufacturer['code'];
+        }
+
         $manufacturer = Manufacturer::updateOrCreate([
             'uuid' => $this->data['manufacturer']['uuid'],
         ], [

@@ -29,8 +29,6 @@ class Grenade implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
@@ -38,14 +36,15 @@ class Grenade implements ShouldQueue
 
         try {
             $parser = new \App\Services\Parser\SC\Grenade($this->filePath, $labels);
-        } catch (FileNotFoundException | JsonException $e) {
+        } catch (FileNotFoundException|JsonException $e) {
             $this->fail($e);
+
             return;
         }
         $item = $parser->getData();
 
         /** @var \App\Models\SC\Char\Grenade $model */
-        \App\Models\SC\Char\Grenade::updateOrCreate([
+        \App\Models\SC\Char\Grenade::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'aoe' => $item['aoe'] ?? null,

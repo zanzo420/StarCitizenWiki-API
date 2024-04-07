@@ -49,7 +49,7 @@ class PersonalWeapon implements ShouldQueue
         $item = $parser->getData();
 
         try {
-            $itemModel = PersonalWeaponModel::where('uuid', $item['uuid'])->firstOrFail();
+            $itemModel = PersonalWeaponModel::query()->withoutGlobalScopes()->where('uuid', $item['uuid'])->firstOrFail();
         } catch (ModelNotFoundException $e) {
             return;
         }
@@ -65,7 +65,7 @@ class PersonalWeapon implements ShouldQueue
             return;
         }
 
-        (new \App\Jobs\SC\Import\Ammunition($data))->handle();
+        (new Ammunition($data))->handle();
     }
 
     private function addModes(array $data, PersonalWeaponModel $weapon): void

@@ -36,8 +36,7 @@ class Manufacturer extends Model
         return Item::query()
             ->whereRelation('manufacturer', 'name', $this->name)
             ->where(function (Builder $query) {
-                $query->where('name', 'NOT LIKE', '%PLACEHOLDER%')
-                    ->where('type', 'NOT LIKE', '%Seat%')
+                $query->where('type', 'NOT LIKE', '%Seat%')
                     ->where('type', 'NOT LIKE', '%Access%')
                     ->where('type', 'NOT LIKE', 'NOITEM%')
                     ->where('type', '!=', 'Armor');
@@ -52,7 +51,8 @@ class Manufacturer extends Model
     {
         return Vehicle::query()
             ->where('is_ship', 1)
-            ->whereRelation('item.manufacturer', 'name', $this->name)->count();
+            ->whereRelation('item.manufacturer', 'name', $this->name)
+            ->count();
     }
 
     /**
@@ -62,12 +62,10 @@ class Manufacturer extends Model
     {
         return Vehicle::query()
             ->where('is_ship', 0)
-            ->whereRelation('item.manufacturer', 'name', $this->name)->count();
+            ->whereRelation('item.manufacturer', 'name', $this->name)
+            ->count();
     }
 
-    /**
-     * @return Collection
-     */
     public function items(): Collection
     {
         return Item::query()
@@ -78,10 +76,6 @@ class Manufacturer extends Model
                     ->where('type', 'NOT LIKE', '%Access%')
                     ->where('type', 'NOT LIKE', 'NOITEM%')
                     ->where('type', '!=', 'Armor');
-//                    ->where(function(Builder $query) {
-//                        $query->where('type', 'LIKE', 'Char%')
-//                            ->orWhere('type', 'LIKE', 'Weapon%');
-//                    });
             })
             ->get();
     }

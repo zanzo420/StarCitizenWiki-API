@@ -135,7 +135,7 @@ TEMPLATE;
     {
         $name = $model->name;
 
-        if (in_array($name, ['Liberator', 'Odyssey', 'Nova', 'Vulcan', 'Eclipse', 'Centurion', 'Citadel'])) {
+        if (in_array($name, ['Liberator', 'Odyssey', 'Nova', 'Vulcan', 'Eclipse', 'Centurion', 'Citadel', 'Castra', 'Mercury'])) {
             $name = sprintf('%s (%s)', $name, ($this->typeMapping[$model->type] ?? $model->type));
         }
 

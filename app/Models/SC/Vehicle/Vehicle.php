@@ -125,18 +125,6 @@ class Vehicle extends CommodityItem
 
     protected $perPage = 5;
 
-    protected static function boot(): void
-    {
-        parent::boot();
-
-        static::addGlobalScope(
-            'has_item',
-            static function (Builder $builder) {
-                $builder->whereHas('item');
-            }
-        );
-    }
-
     public function getRouteKey()
     {
         return $this->item_uuid;

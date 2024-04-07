@@ -30,8 +30,6 @@ class Food implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
@@ -39,14 +37,15 @@ class Food implements ShouldQueue
 
         try {
             $parser = new \App\Services\Parser\SC\Food($this->filePath, $labels);
-        } catch (FileNotFoundException | JsonException $e) {
+        } catch (FileNotFoundException|JsonException $e) {
             $this->fail($e);
+
             return;
         }
         $item = $parser->getData();
 
         /** @var \App\Models\SC\Food\Food $model */
-        $model = \App\Models\SC\Food\Food::updateOrCreate([
+        $model = \App\Models\SC\Food\Food::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'nutritional_density_rating' => $item['nutritional_density_rating'] ?? null,
@@ -58,9 +57,9 @@ class Food implements ShouldQueue
         ]);
 
         $ids = collect($item['effects'])->map(function (string $effect) {
-            return (FoodEffect::firstOrCreate([
+            return FoodEffect::firstOrCreate([
                 'name' => $effect,
-            ]))->id;
+            ])->id;
         });
 
         $model->effects()->sync($ids);

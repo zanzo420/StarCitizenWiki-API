@@ -51,7 +51,7 @@ class WeaponAttachment implements ShouldQueue
         }
 
         if (! empty($item['ammo'])) {
-            PersonalWeaponMagazine::updateOrCreate([
+            PersonalWeaponMagazine::query()->withoutGlobalScopes()->updateOrCreate([
                 'item_uuid' => $item['uuid'],
             ], [
                 'initial_ammo_count' => $item['ammo']['initial_ammo_count'] ?? null,
@@ -62,7 +62,7 @@ class WeaponAttachment implements ShouldQueue
         }
 
         if (! empty($item['iron_sight'])) {
-            IronSight::updateOrCreate([
+            IronSight::query()->withoutGlobalScopes()->updateOrCreate([
                 'item_uuid' => $item['uuid'],
             ], [
                 'default_range' => $item['iron_sight']['default_range'],

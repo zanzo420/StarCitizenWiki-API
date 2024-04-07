@@ -31,7 +31,6 @@ ITEM;
 
     final public function uploadWiki($model, string $summary): void
     {
-        dd($this->getPageText($model));
         try {
             $token = $this->getCsrfToken('services.wiki_translations');
             $response = MediaWikiApi::edit($this->getPageName($model))
@@ -39,14 +38,16 @@ ITEM;
                 ->text($this->getPageText($model))
                 ->csrfToken($token)
                 ->summary($summary)
-                ->request();
+                ->request([
+                    'timeout' => 600,
+                ]);
         } catch (ErrorException|GuzzleException $e) {
             $this->error($e->getMessage());
 
             return;
         }
 
-        $this->createEnglishSubpage($this->getPageName($model), $token);
+//        $this->createEnglishSubpage($this->getPageName($model), $token);
 
         if ($response->hasErrors() && $response->getErrors()['code'] !== 'articleexists') {
             $this->error(implode(', ', $response->getErrors()));
@@ -77,7 +78,8 @@ ITEM;
 
         $this->template = str_replace(
             '<CURDATE>',
-            Carbon::now()->format('Y-m-d'),
+            '2024-04-01',
+            //Carbon::now()->format('Y-m-d'),
             $this->template
         );
         $this->template = str_replace(

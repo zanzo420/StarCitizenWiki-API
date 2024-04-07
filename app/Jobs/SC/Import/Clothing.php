@@ -30,8 +30,6 @@ class Clothing implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
@@ -39,21 +37,22 @@ class Clothing implements ShouldQueue
 
         try {
             $parser = new \App\Services\Parser\SC\Clothing($this->filePath, $labels);
-        } catch (FileNotFoundException | JsonException $e) {
+        } catch (FileNotFoundException|JsonException $e) {
             $this->fail($e);
+
             return;
         }
 
         $item = $parser->getData();
 
         try {
-            $model = \App\Models\SC\Char\Clothing\Clothing::where('uuid', $item['uuid'])->firstOrFail();
+            $model = \App\Models\SC\Char\Clothing\Clothing::query()->withoutGlobalScopes()->where('uuid', $item['uuid'])->firstOrFail();
         } catch (ModelNotFoundException $e) {
             return;
         }
 
         if (isset($item['resistances'])) {
-            if (!empty($item['damage_reduction'])) {
+            if (! empty($item['damage_reduction'])) {
                 $model->resistances()->updateOrCreate([
                     'type' => 'damage_reduction',
                 ], [

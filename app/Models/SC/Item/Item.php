@@ -99,7 +99,31 @@ class Item extends HasTranslations
         static::addGlobalScope(
             'version',
             static function (Builder $builder) {
-                $builder->where('sc_items.version', config('api.sc_data_version'));
+                $builder->where('version', config('api.sc_data_version'));
+            }
+        );
+
+        static::addGlobalScope(
+            'only_usable',
+            static function (Builder $builder) {
+                $builder->where('name', '<>', '<= PLACEHOLDER =>')
+                    ->where('class_name', 'NOT LIKE', '%test%')
+                    ->where('class_name', 'NOT LIKE', '%opaque%')
+                    ->where('class_name', 'NOT LIKE', '%nodraw%')
+                    ->where('class_name', 'NOT LIKE', '%mannequin%')
+                    ->where('class_name', 'NOT LIKE', '%ai\_exclusive%')
+                    ->where('class_name', 'NOT LIKE', 'animated%')
+                    ->where('class_name', 'NOT LIKE', '%\_piercing')
+                    ->where('class_name', 'NOT LIKE', '%\_dmg\_%')
+                    ->where('class_name', 'NOT LIKE', '%\_default\_%')
+                    ->where('class_name', 'NOT LIKE', '%\_ai')
+                    ->where('class_name', 'NOT LIKE', '%\_gungame%')
+                    ->where('class_name', 'NOT LIKE', '%\_active%')
+                    ->where('class_name', 'NOT LIKE', '%\_ea\_%')
+                    ->where('class_name', 'NOT LIKE', '%placeholder%')
+                    ->where('class_name', 'NOT LIKE', 'weaponmount\_%')
+                    ->where('class_name', 'NOT LIKE', '%ea\_elim')
+                    ->where('class_name', '<>', 'grin\_tool\_01\_mag');
             }
         );
     }
@@ -392,7 +416,6 @@ class Item extends HasTranslations
             'uuid'
         );
     }
-
 
     public function weaponModifierData(): HasOne
     {

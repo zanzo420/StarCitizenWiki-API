@@ -79,7 +79,7 @@ TEMPLATE;
         $this->withProgressBar(
             PersonalWeapon::all(),
             function (PersonalWeapon $item) {
-                $this->uploadWiki($item, 'Automatische Erstellung von Waffen');
+                $this->uploadWiki($item, 'Automatische Erstellung von Waffenseiten');
             }
         );
 

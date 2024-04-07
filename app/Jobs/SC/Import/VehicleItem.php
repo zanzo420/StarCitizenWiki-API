@@ -66,7 +66,7 @@ class VehicleItem implements ShouldQueue
         $item = $parser->getData();
 
         try {
-            $itemModel = \App\Models\SC\Item\Item::where('uuid', $item['uuid'])->firstOrFail();
+            $itemModel = \App\Models\SC\Item\Item::query()->withoutGlobalScopes()->where('uuid', $item['uuid'])->firstOrFail();
         } catch (ModelNotFoundException $e) {
             return;
         }
@@ -154,7 +154,7 @@ class VehicleItem implements ShouldQueue
 
     private function createArmor(array $item): void
     {
-        Armor::updateOrCreate([
+        Armor::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'signal_infrared' => $item['armor']['signal_infrared'] ?? null,
@@ -171,7 +171,7 @@ class VehicleItem implements ShouldQueue
 
     private function createFlightController(array $item): void
     {
-        FlightController::updateOrCreate([
+        FlightController::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'scm_speed' => $item['flight_controller']['scm_speed'] ?? null,
@@ -184,7 +184,7 @@ class VehicleItem implements ShouldQueue
 
     private function createEmp(array $item): void
     {
-        Emp::updateOrCreate([
+        Emp::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'charge_duration' => $item['emp']['charge_duration'] ?? null,
@@ -196,7 +196,7 @@ class VehicleItem implements ShouldQueue
 
     private function createQuantumInterdictionGenerator(array $item): void
     {
-        QuantumInterdictionGenerator::updateOrCreate([
+        QuantumInterdictionGenerator::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'jammer_range' => $item['qig']['jammer_range'] ?? null,
@@ -209,7 +209,7 @@ class VehicleItem implements ShouldQueue
 
     private function createCooler(array $item): void
     {
-        Cooler::updateOrCreate([
+        Cooler::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'cooling_rate' => $item['cooler']['cooling_rate'],
@@ -220,7 +220,7 @@ class VehicleItem implements ShouldQueue
 
     private function createPowerPlant(array $item): void
     {
-        PowerPlant::updateOrCreate([
+        PowerPlant::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'power_output' => $item['power_plant']['power_output'],
@@ -230,7 +230,7 @@ class VehicleItem implements ShouldQueue
     private function createShield(array $item): void
     {
         /** @var Shield $shield */
-        $shield = Shield::updateOrCreate([
+        $shield = Shield::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'max_shield_health' => $item['shield']['max_shield_health'],
@@ -256,7 +256,7 @@ class VehicleItem implements ShouldQueue
     private function createQuantumDrive(array $item): void
     {
         /** @var QuantumDrive $drive */
-        $drive = QuantumDrive::updateOrCreate([
+        $drive = QuantumDrive::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'quantum_fuel_requirement' => $item['quantum_drive']['quantum_fuel_requirement'],
@@ -291,7 +291,7 @@ class VehicleItem implements ShouldQueue
 
     private function createFuelTank(array $item): void
     {
-        FuelTank::updateOrCreate([
+        FuelTank::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'fill_rate' => $item['fuel_tank']['fill_rate'] ?? null,
@@ -306,7 +306,7 @@ class VehicleItem implements ShouldQueue
             return;
         }
 
-        FuelIntake::updateOrCreate([
+        FuelIntake::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'fuel_push_rate' => $item['fuel_intake']['fuel_push_rate'] ?? null,
@@ -321,7 +321,7 @@ class VehicleItem implements ShouldQueue
         }
 
         /** @var VehicleWeapon $weapon */
-        $weapon = VehicleWeapon::updateOrCreate([
+        $weapon = VehicleWeapon::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'weapon_type' => Arr::get($item, 'weapon.weapon_type'),
@@ -373,7 +373,7 @@ class VehicleItem implements ShouldQueue
             $lockRangeMin = max(0, $lockRangeMin);
         }
 
-        $missile = Missile::updateOrCreate([
+        $missile = Missile::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'signal_type' => $item['missile']['signal_type'],
@@ -406,7 +406,7 @@ class VehicleItem implements ShouldQueue
             return;
         }
 
-        $bomb = Bomb::updateOrCreate([
+        $bomb = Bomb::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'arm_time' => $item['bomb']['arm_time'] ?? null,
@@ -435,7 +435,7 @@ class VehicleItem implements ShouldQueue
             return;
         }
 
-        Thruster::updateOrCreate([
+        Thruster::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'thrust_capacity' => $item['thruster']['thrust_capacity'] ?? null,
@@ -447,7 +447,7 @@ class VehicleItem implements ShouldQueue
 
     private function createSelfDestruct(array $item): void
     {
-        SelfDestruct::updateOrCreate([
+        SelfDestruct::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'damage' => $item['self_destruct']['damage'] ?? null,
@@ -473,7 +473,7 @@ class VehicleItem implements ShouldQueue
 
     private function createTractorBeam(array $item): void
     {
-        TractorBeam::updateOrCreate([
+        TractorBeam::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'min_force' => $item['tractor_beam']['min_force'] ?? null,
@@ -491,7 +491,7 @@ class VehicleItem implements ShouldQueue
 
     private function createSalvageModifier(array $item): void
     {
-        SalvageModifier::updateOrCreate([
+        SalvageModifier::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'salvage_speed_multiplier' => $item['salvage_modifier']['salvage_speed_multiplier'] ?? null,

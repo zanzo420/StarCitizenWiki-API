@@ -29,8 +29,6 @@ class MiningModule implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
@@ -38,14 +36,15 @@ class MiningModule implements ShouldQueue
 
         try {
             $parser = new \App\Services\Parser\SC\MiningModule($this->filePath, $labels);
-        } catch (FileNotFoundException | JsonException $e) {
+        } catch (FileNotFoundException|JsonException $e) {
             $this->fail($e);
+
             return;
         }
         $item = $parser->getData();
 
         /** @var \App\Models\SC\ItemSpecification\MiningModule $model */
-        \App\Models\SC\ItemSpecification\MiningModule::updateOrCreate([
+        \App\Models\SC\ItemSpecification\MiningModule::query()->withoutGlobalScopes()->updateOrCreate([
             'item_uuid' => $item['uuid'],
         ], [
             'type' => $item['type'] ?? null,
