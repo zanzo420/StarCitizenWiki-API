@@ -4,12 +4,22 @@ namespace Tests\Feature\Api;
 
 use App\Models\SC\Item\Item;
 use App\Models\SC\Vehicle\Vehicle;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class ItemApiTest extends TestCase
 {
+    use WithoutMiddleware;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutMiddleware();
+    }
+
     public function refreshDatabase(): void
     {
 
@@ -25,7 +35,6 @@ class ItemApiTest extends TestCase
         }
 
         Item::query()
-            ->where('class_name', 'NOT LIKE', '%test_%')
             ->chunk(100, function (Collection $items) {
                 $items->each(function (Item $item) {
                     $response = Http::get(route('api.v2.items.show', $item), [
@@ -49,6 +58,8 @@ class ItemApiTest extends TestCase
         if (env('APP_NAME') === 'API_CI') {
             $this->markTestSkipped('Can only run locally');
         }
+
+        $this->withoutMiddleware(ThrottleRequests::class);
 
         Vehicle::query()
             ->withoutEagerLoads()
