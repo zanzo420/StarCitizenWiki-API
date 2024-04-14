@@ -10,6 +10,7 @@ use App\Models\SC\Char\Clothing\Clothes;
 use App\Models\SC\Char\Grenade;
 use App\Models\SC\Char\PersonalWeapon\BarrelAttach;
 use App\Models\SC\Char\PersonalWeapon\IronSight;
+use App\Models\SC\Char\PersonalWeapon\Knife;
 use App\Models\SC\Char\PersonalWeapon\PersonalWeapon;
 use App\Models\SC\Char\PersonalWeapon\PersonalWeaponMagazine;
 use App\Models\SC\Food\Food;
@@ -223,11 +224,11 @@ class Item extends HasTranslations
                  * Personal Weapons
                  */
             case str_contains($this->type, 'WeaponPersonal'):
-                if ($this->sub_type === 'Grenade') {
-                    return $this->hasOne(Grenade::class, 'item_uuid', 'uuid')->withDefault();
-                }
-
-                return $this->hasOne(PersonalWeapon::class, 'uuid', 'uuid')->withDefault();
+                return match ($this->sub_type) {
+                    'Grenade' => $this->hasOne(Grenade::class, 'item_uuid', 'uuid')->withDefault(),
+                    'Knife' => $this->hasOne(Knife::class, 'item_uuid', 'uuid')->withDefault(),
+                    default => $this->hasOne(PersonalWeapon::class, 'uuid', 'uuid')->withDefault()
+                };
 
             case $this->type === 'WeaponAttachment':
                 switch ($this->sub_type) {

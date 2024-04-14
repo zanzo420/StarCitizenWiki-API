@@ -27,11 +27,11 @@ final class ItemSpecificationCreator
 
                 // Personal Weapons
             case stripos($type, 'WeaponPersonal') !== false:
-                if ($subType === 'Grenade') {
-                    Grenade::dispatch($filePath);
-                } else {
-                    PersonalWeapon::dispatch($filePath);
-                }
+                match ($subType) {
+                    'Grenade' => Grenade::dispatch($filePath),
+                    'Knife' => Knife::dispatch($filePath),
+                    default => PersonalWeapon::dispatch($filePath),
+                };
                 break;
             case $type === 'WeaponAttachment':
                 WeaponAttachment::dispatch($filePath);

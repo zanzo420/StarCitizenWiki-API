@@ -9,6 +9,7 @@ use App\Http\Resources\SC\Char\ClothingResource;
 use App\Http\Resources\SC\Char\PersonalWeapon\BarrelAttachResource;
 use App\Http\Resources\SC\Char\PersonalWeapon\GrenadeResource;
 use App\Http\Resources\SC\Char\PersonalWeapon\IronSightResource;
+use App\Http\Resources\SC\Char\PersonalWeapon\KnifeResource;
 use App\Http\Resources\SC\Char\PersonalWeapon\PersonalWeaponMagazineResource;
 use App\Http\Resources\SC\Char\PersonalWeapon\PersonalWeaponResource;
 use App\Http\Resources\SC\FoodResource;
@@ -87,6 +88,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'grenade', ref: '#/components/schemas/grenade_v2', nullable: true),
         new OA\Property(property: 'hacking_chip', ref: '#/components/schemas/hacking_chip_v2', nullable: true),
         new OA\Property(property: 'iron_sight', ref: '#/components/schemas/iron_sight_v2', nullable: true),
+        new OA\Property(property: 'knife', ref: '#/components/schemas/knife_v2', nullable: true),
         new OA\Property(property: 'mining_laser', ref: '#/components/schemas/mining_laser_v2', nullable: true),
         new OA\Property(property: 'mining_module', ref: '#/components/schemas/mining_module_v2', nullable: true),
         new OA\Property(property: 'missile', ref: '#/components/schemas/missile_v2', nullable: true),
@@ -327,6 +329,10 @@ class ItemResource extends AbstractTranslationResource
             $this->type === 'WeaponPersonal' && $this->sub_type === 'Grenade' => [
                 $specification->exists,
                 ['grenade' => new GrenadeResource($specification)],
+            ],
+            $this->type === 'WeaponPersonal' && $this->sub_type === 'Knife' => [
+                $specification->exists,
+                ['knife' => new KnifeResource($specification)],
             ],
             $this->type === 'WeaponPersonal' => [
                 $specification->exists,

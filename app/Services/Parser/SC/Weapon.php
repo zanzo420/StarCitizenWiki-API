@@ -47,6 +47,7 @@ final class Weapon extends AbstractCommodityItem
             'modes' => $this->buildModesPart(),
             'magazine' => $this->buildMagazinePart($this->item),
             'regen_consumption' => $this->buildRegenConsumption($this->item),
+            'knife' => $this->buildKnifePart($this->item),
         ];
 
         if (empty($out['capacity']) && ! empty($out['regen_consumption'])) {
@@ -320,6 +321,25 @@ final class Weapon extends AbstractCommodityItem
             'requested_ammo_load' => $data['requestedAmmoLoad'] ?? null,
             'cooldown' => $data['regenerationCooldown'] ?? null,
             'cost_per_bullet' => $data['regenerationCostPerBullet'] ?? null,
+        ];
+    }
+
+    private function buildKnifePart(Collection $rawData)
+    {
+        $data = Arr::get($rawData, 'Raw.Entity.Components.SMeleeWeaponComponentParams');
+        $config = Arr::get($rawData, 'combatConfig.attackCategoryParams');
+
+        if (empty($data) || empty($config)) {
+            return [];
+        }
+
+        return [
+            'can_be_used_for_take_down' => $data['canBeUsedForTakeDown'] ?? null,
+            'can_block' => $data['canBlock'] ?? null,
+            'can_be_used_in_prone' => $data['canBeUsedInProne'] ?? null,
+            'can_dodge' => $data['canDodge'] ?? null,
+            'melee_combat_config' => $data['meleeCombatConfig'] ?? null,
+            'attack_config' => $config,
         ];
     }
 }
