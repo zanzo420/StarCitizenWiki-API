@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: 'Knife_v2',
+    schema: 'knife_v2',
     title: 'Knife',
     description: 'Knifes',
     properties: [
