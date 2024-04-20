@@ -100,7 +100,7 @@ class Item extends HasTranslations
         static::addGlobalScope(
             'version',
             static function (Builder $builder) {
-                $builder->where('version', config('api.sc_data_version'));
+                $builder->where('sc_items.version', config('api.sc_data_version'));
             }
         );
 
