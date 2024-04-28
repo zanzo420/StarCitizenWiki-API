@@ -18,16 +18,16 @@ class VehicleItem extends Item
         static::addGlobalScope(
             'type',
             static function (Builder $builder) {
-                $builder->where('name', '<>', '<= PLACEHOLDER =>')
-                    ->where('class_name', 'NOT LIKE', '%test%')
-                    ->where('class_name', 'NOT LIKE', '%lowpoly%')
-                    ->where('class_name', 'NOT LIKE', '%dummy%')
-                    ->where('class_name', 'NOT LIKE', '%_mm')
-                    ->where('class_name', 'NOT LIKE', '%s%_idris_m')
-                    ->where('class_name', 'NOT LIKE', '%s%_turret')
-                    ->where('class_name', 'NOT LIKE', 'mrck_s05_orig_%') //MSD-543 Missile Rack
-                    ->where('class_name', 'NOT LIKE', 'mrck_s05_behr_quad_s03_a') //MSD-543 Missile Rack
-                    ->whereIn('type', [
+                $builder
+                    ->where('sc_items.class_name', 'NOT LIKE', '%test%')
+                    ->where('sc_items.class_name', 'NOT LIKE', '%lowpoly%')
+                    ->where('sc_items.class_name', 'NOT LIKE', '%dummy%')
+                    ->where('sc_items.class_name', 'NOT LIKE', '%_mm')
+                    ->where('sc_items.class_name', 'NOT LIKE', '%s%_idris_m')
+                    ->where('sc_items.class_name', 'NOT LIKE', '%s%_turret')
+                    ->where('sc_items.class_name', 'NOT LIKE', 'mrck_s05_orig_%') //MSD-543 Missile Rack
+                    ->where('sc_items.class_name', 'NOT LIKE', 'mrck_s05_behr_quad_s03_a') //MSD-543 Missile Rack
+                    ->whereIn('sc_items.type', [
                         'Arm',
                         'Battery',
                         'BombLauncher',

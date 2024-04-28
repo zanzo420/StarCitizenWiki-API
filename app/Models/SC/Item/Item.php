@@ -107,7 +107,8 @@ class Item extends HasTranslations
         static::addGlobalScope(
             'only_usable',
             static function (Builder $builder) {
-                $builder->where('sc_items.name', '<>', '<= PLACEHOLDER =>')
+                $builder
+//                    ->where('sc_items.name', '<>', '<= PLACEHOLDER =>')
                     ->where('sc_items.class_name', 'NOT LIKE', '%test%')
                     ->where('sc_items.class_name', 'NOT LIKE', '%opaque%')
                     ->where('sc_items.class_name', 'NOT LIKE', '%nodraw%')
