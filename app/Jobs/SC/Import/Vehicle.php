@@ -282,6 +282,7 @@ class Vehicle implements ShouldQueue
     private function getItemUUID(string $className): ?string
     {
         return \App\Models\SC\Item\Item::query()
+            ->withoutGlobalScopes()
             ->where('class_name', strtolower($className))
             ->first(['uuid'])->uuid ?? null;
     }

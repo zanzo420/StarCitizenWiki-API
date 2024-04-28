@@ -48,9 +48,6 @@ class HardpointResource extends AbstractBaseResource
 
     /**
      * Transform the resource collection into an array.
-     *
-     * @param Request $request
-     * @return array
      */
     public function toArray(Request $request): array
     {
@@ -75,7 +72,7 @@ class HardpointResource extends AbstractBaseResource
                 'sub_type' => $this->item->sub_type,
             ];
 
-            if ($this->min_size ===  0) {
+            if ($this->min_size === 0) {
                 $data['min_size'] = $this->item->size;
                 $data['max_size'] = $this->item->size;
             }
