@@ -103,8 +103,10 @@ abstract class AbstractCommodityItem
 
     protected function getName(array $attachDef, string $default): string
     {
-        $name = $this->labels->get(substr($attachDef['Localization']['Name'], 1));
-        $name = $this->cleanString(trim($name ?? $default));
+        $key = substr($attachDef['Localization']['Name'], 1);
+        $name = $this->labels->get($key);
+        $nameP = $this->labels->get($key.',P');
+        $name = $this->cleanString(trim($name ?? $nameP ?? $default));
 
         return empty($name) ? $default : $name;
     }
