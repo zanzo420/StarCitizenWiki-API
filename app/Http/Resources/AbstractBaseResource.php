@@ -33,6 +33,8 @@ abstract class AbstractBaseResource extends JsonResource
 
     public const MANUFACTURERS_SHOW = 'manufacturers/';
 
+    public const MISSIONS_SHOW = 'missions/';
+
     public function __construct($resource)
     {
         parent::__construct($resource);

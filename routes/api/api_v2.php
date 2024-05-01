@@ -119,5 +119,9 @@ Route::group(
         Route::get('food', 'FoodController@index')->name('food.index');
         Route::get('food/{food}', 'FoodController@show')->name('food.show')
             ->where('food', '.*');
+
+        Route::get('missions', 'MissionController@index')->name('missions.index');
+        Route::get('missions/{mission}', 'MissionController@show')->name('missions.show')
+            ->where('mission', '.*');
     }
 );

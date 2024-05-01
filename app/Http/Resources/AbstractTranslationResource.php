@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Models\SC\Item\ItemTranslation;
+use App\Models\SC\Mission\GiverTranslation;
+use App\Models\SC\Mission\Translation;
 use App\Models\StarCitizen\Starmap\CelestialObject\CelestialObjectTranslation;
 use App\Models\StarCitizen\Starmap\Starsystem\StarsystemTranslation;
 use App\Models\System\Language;
@@ -36,7 +38,7 @@ abstract class AbstractTranslationResource extends AbstractBaseResource
         $translations = $model->translationsCollection();
 
         $locale = $request->get('locale');
-        if (!empty($locale)) {
+        if (! empty($locale)) {
             return $this->getSingleTranslation($translations, $request->get('locale'), $translationKey);
         }
 
@@ -50,7 +52,7 @@ abstract class AbstractTranslationResource extends AbstractBaseResource
             }
         )->filter(
             function ($translations) {
-                return !empty($translations);
+                return ! empty($translations);
             }
         );
 
@@ -63,13 +65,15 @@ abstract class AbstractTranslationResource extends AbstractBaseResource
 
         if (
             $translations instanceof ItemTranslation ||
+            $translations instanceof Translation ||
+            $translations instanceof GiverTranslation ||
             $translations instanceof CelestialObjectTranslation ||
             $translations instanceof StarsystemTranslation
         ) {
             return $translations[$translationKey];
         }
 
-        if ($translations->has($locale) && !$translations->get($locale) instanceof Language) {
+        if ($translations->has($locale) && ! $translations->get($locale) instanceof Language) {
             $translation = $translations->get($locale)[$translationKey];
         } elseif ($translations->has('en_EN')) {
             $translation = $translations->get('en_EN')[$translationKey];

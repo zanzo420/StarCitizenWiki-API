@@ -19,7 +19,9 @@ use App\Console\Commands\Rsi\CommLink\Wiki\CreateCommLinkWikiPages;
 use App\Console\Commands\Rsi\CommLink\Wiki\CreateCommLinkWikiTranslationPages;
 use App\Console\Commands\SC\ComputeItemBaseIds;
 use App\Console\Commands\SC\ImportClothing;
+use App\Console\Commands\SC\ImportFactions;
 use App\Console\Commands\SC\ImportItems;
+use App\Console\Commands\SC\ImportMissions;
 use App\Console\Commands\SC\ImportPersonalWeapons;
 use App\Console\Commands\SC\ImportShops;
 use App\Console\Commands\SC\ImportVehicleItems;
@@ -115,6 +117,8 @@ class Kernel extends ConsoleKernel
         ImportClothing::class,
         ImportVehicleItems::class,
         ImportPersonalWeapons::class,
+        ImportFactions::class,
+        ImportMissions::class,
         ComputeItemBaseIds::class,
 
         TranslateItems::class,
