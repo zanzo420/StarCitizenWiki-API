@@ -116,6 +116,12 @@ use OpenApi\Attributes as OA;
             nullable: true,
         ),
         new OA\Property(
+            property: 'entity_tags',
+            type: 'array',
+            items: new OA\Items(type: 'string'),
+            nullable: true,
+        ),
+        new OA\Property(
             property: 'interactions',
             type: 'array',
             items: new OA\Items(type: 'string'),
@@ -207,6 +213,7 @@ class ItemResource extends AbstractTranslationResource
             ]),
             'tags' => $this->defaultTags->pluck('name')->toArray(),
             'required_tags' => $this->requiredTags->pluck('name')->toArray(),
+            'entity_tags' => $this->entityTags->pluck('tag')->toArray(),
             'interactions' => $this->interactions->pluck('name')->toArray(),
             'ports' => ItemPortResource::collection($this->whenLoaded('ports')),
             $this->mergeWhen(! $this->onlySimpleData && $this->relationLoaded('heatData'), [

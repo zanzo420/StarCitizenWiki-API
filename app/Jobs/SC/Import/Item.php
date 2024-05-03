@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs\SC\Import;
 
+use App\Models\SC\EntityTag;
 use App\Models\SC\Item\Interaction;
 use App\Models\SC\Item\ItemPort;
 use App\Models\SC\Item\ItemPortType;
@@ -94,6 +95,7 @@ class Item implements ShouldQueue
         $this->addTags($itemModel, $this->data, 'tags');
         $this->addTags($itemModel, $this->data, 'required_tags', true);
         $this->addInteractions($itemModel, $this->data);
+        $this->addEntityTags($itemModel, $this->data);
     }
 
     private function createDimensionModel(\App\Models\SC\Item\Item $itemModel): void
@@ -318,5 +320,28 @@ class Item implements ShouldQueue
             });
 
         $model->interactions()->sync($interactions);
+    }
+
+    /**
+     * @param \App\Models\SC\Item\Item $model
+     * @param $data
+     */
+    private function addEntityTags(\App\Models\SC\Item\Item $model, $data): void
+    {
+        if (empty($data['entity_tags'])) {
+            return;
+        }
+
+        $tags = collect($data['entity_tags'])
+            ->map('trim')
+            ->map(function ($tag) {
+                $tag = EntityTag::query()->firstOrCreate([
+                    'tag' => $tag,
+                ]);
+
+                return $tag->id;
+            });
+
+        $model->entityTags()->sync($tags);
     }
 }

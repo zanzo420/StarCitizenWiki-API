@@ -13,6 +13,7 @@ use App\Models\SC\Char\PersonalWeapon\IronSight;
 use App\Models\SC\Char\PersonalWeapon\Knife;
 use App\Models\SC\Char\PersonalWeapon\PersonalWeapon;
 use App\Models\SC\Char\PersonalWeapon\PersonalWeaponMagazine;
+use App\Models\SC\EntityTag;
 use App\Models\SC\Food\Food;
 use App\Models\SC\ItemSpecification\Bomb\Bomb;
 use App\Models\SC\ItemSpecification\Cooler;
@@ -486,5 +487,15 @@ class Item extends HasTranslations
     public function variants(): HasMany
     {
         return $this->hasMany(self::class, 'base_id', 'id');
+    }
+
+    public function entityTags(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            EntityTag::class,
+            'sc_item_entity_tag',
+            'item_id',
+            'entity_tag_id'
+        );
     }
 }
