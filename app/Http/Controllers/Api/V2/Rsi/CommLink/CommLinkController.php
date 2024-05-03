@@ -57,7 +57,7 @@ class CommLinkController extends AbstractApiV2Controller
                     type: 'array',
                     items: new OA\Items(ref: '#/components/schemas/comm_link_v2')
                 )
-            )
+            ),
         ]
     )]
     public function index(): AnonymousResourceCollection
@@ -95,14 +95,14 @@ class CommLinkController extends AbstractApiV2Controller
         ],
         responses: [
             new OA\Response(
-                ref: '#/components/schemas/comm_link_v2',
                 response: 200,
                 description: 'A singular Comm-Link',
+                content: new OA\JsonContent(ref: '#/components/schemas/comm_link_v2')
             ),
             new OA\Response(
                 response: 404,
                 description: 'No Comm-Link with specified ID found.',
-            )
+            ),
         ]
     )]
     public function show(Request $request): AbstractBaseResource

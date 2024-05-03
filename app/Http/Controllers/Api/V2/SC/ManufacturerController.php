@@ -36,7 +36,7 @@ class ManufacturerController extends AbstractApiV2Controller
                     type: 'array',
                     items: new OA\Items(ref: '#/components/schemas/manufacturer_link_v2')
                 )
-            )
+            ),
         ]
     )]
     public function index(Request $request): AnonymousResourceCollection
@@ -70,11 +70,8 @@ class ManufacturerController extends AbstractApiV2Controller
             new OA\Response(
                 response: 200,
                 description: 'A Manufacturer and its products',
-                content: new OA\JsonContent(
-                    type: 'array',
-                    items: new OA\Items(ref: '#/components/schemas/manufacturer_v2')
-                )
-            )
+                content: new OA\JsonContent(ref: '#/components/schemas/manufacturer_v2')
+            ),
         ]
     )]
     public function show(Request $request): AbstractBaseResource
@@ -118,7 +115,7 @@ class ManufacturerController extends AbstractApiV2Controller
                     type: 'array',
                     items: new OA\Items(ref: '#/components/schemas/manufacturer_link_v2')
                 )
-            )
+            ),
         ]
     )]
     public function search(ItemSearchRequest $request): JsonResource

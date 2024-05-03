@@ -19,10 +19,10 @@ class StatController extends AbstractApiV2Controller
         tags: ['Stats', 'RSI-Website'],
         responses: [
             new OA\Response(
-                ref: '#/components/schemas/stat_v2',
                 response: 200,
-                description: 'List of stats'
-            )
+                description: 'Latest statistics',
+                content: new OA\JsonContent(ref: '#/components/schemas/stat_v2')
+            ),
         ]
     )]
     public function latest(Request $request): StatResource
@@ -47,7 +47,7 @@ class StatController extends AbstractApiV2Controller
                     type: 'array',
                     items: new OA\Items(ref: '#/components/schemas/stat_v2')
                 )
-            )
+            ),
         ]
     )]
     public function index(Request $request): AnonymousResourceCollection

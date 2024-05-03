@@ -42,7 +42,7 @@ class CommLinkSearchController extends AbstractApiV2Controller
                         type: 'object',
                     ),
                     example: '{"query": "Banu Merchantman"}',
-                )
+                ),
             ]
         ),
         tags: ['Comm-Links', 'RSI-Website'],
@@ -51,14 +51,14 @@ class CommLinkSearchController extends AbstractApiV2Controller
         ],
         responses: [
             new OA\Response(
-                ref: '#/components/schemas/comm_link_v2',
                 response: 200,
                 description: 'A singular Comm-Link',
+                content: new OA\JsonContent(ref: '#/components/schemas/comm_link_v2')
             ),
             new OA\Response(
                 response: 404,
                 description: 'No Comm-Link with found.',
-            )
+            ),
         ],
     )]
     public function searchByTitle(Request $request): AnonymousResourceCollection
@@ -94,7 +94,7 @@ class CommLinkSearchController extends AbstractApiV2Controller
                         type: 'object',
                     ),
                     example: '{"url": "https://robertsspaceindustries.com/i/cc75a45005a236c6e015dfc2782a2f55ed1e84a2/ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResiiucPBBDeyrBscqRyZz4qxNsSbWvqUwdG/alien-week-2022-front.webp"}',
-                )
+                ),
             ]
         ),
         tags: ['Comm-Links', 'RSI-Website'],
@@ -110,7 +110,7 @@ class CommLinkSearchController extends AbstractApiV2Controller
             new OA\Response(
                 response: 404,
                 description: 'No Comm-Link found.',
-            )
+            ),
         ],
     )]
     public function reverseImageLinkSearch(Request $request): AnonymousResourceCollection
@@ -129,7 +129,7 @@ class CommLinkSearchController extends AbstractApiV2Controller
             array_pop($parts);
             $path = implode('/', $parts);
 
-            $image->where('src', 'LIKE', $path . '%');
+            $image->where('src', 'LIKE', $path.'%');
         } else {
             $image->where('dir', $dir);
         }
@@ -190,7 +190,7 @@ class CommLinkSearchController extends AbstractApiV2Controller
                     ),
                 ),
                 explode: false,
-            )
+            ),
         ],
         responses: [
             new OA\Response(
@@ -204,7 +204,7 @@ class CommLinkSearchController extends AbstractApiV2Controller
             new OA\Response(
                 response: 404,
                 description: 'No Comm-Link found.',
-            )
+            ),
         ],
     )]
     public function reverseImageSearch(Request $request): AnonymousResourceCollection
@@ -230,7 +230,7 @@ class CommLinkSearchController extends AbstractApiV2Controller
             'pdq_hash4' => $pdqHash[3],
         ];
 
-        $data = $this->getResultImages($hashData, (int)$request->get('similarity'));
+        $data = $this->getResultImages($hashData, (int) $request->get('similarity'));
 
         return ImageHashResource::collection($data);
     }
@@ -268,7 +268,7 @@ class CommLinkSearchController extends AbstractApiV2Controller
                         $image->similarity_method = __('Basierend auf Merkmalen des Inhalts');
                     } else {
                         $image->similarity = round((1 - ($data->pdq_distance / 256)) * 100);
-                        $image->similarity_method = ''; #PDQ
+                        $image->similarity_method = ''; //PDQ
                     }
 
                     $image->pdq_distance = $data->pdq_distance ?? $image->p_distance;
@@ -284,8 +284,7 @@ class CommLinkSearchController extends AbstractApiV2Controller
     /**
      * Returns the RSI directory hash of an image url
      *
-     * @param string $url The RSI Media URl
-     *
+     * @param  string  $url  The RSI Media URl
      * @return string The directory hash of the image
      */
     private function getDirHashFromImageUrl(string $url): string
@@ -305,7 +304,7 @@ class CommLinkSearchController extends AbstractApiV2Controller
      */
     private function checkExtensionsLoaded(): void
     {
-        if (!extension_loaded('gd') && !extension_loaded('imagick')) {
+        if (! extension_loaded('gd') && ! extension_loaded('imagick')) {
             app('Log')::error('Required extension "GD" or "Imagick" not available.');
 
             throw new HttpException(501, 'Required extension "GD" or "Imagick" not available.');
@@ -315,7 +314,6 @@ class CommLinkSearchController extends AbstractApiV2Controller
     /**
      * Return hashes based on database connection type
      *
-     * @param array $hashData
      *
      * @return Builder[]|Collection|\Illuminate\Support\Collection
      */
@@ -332,8 +330,7 @@ class CommLinkSearchController extends AbstractApiV2Controller
     /**
      * Get the image hashes that equal the provided hash
      *
-     * @param string $hash The image hash
-     *
+     * @param  string  $hash  The image hash
      * @return Builder[]|Collection
      */
     private function getHashesFromSQLiteStore(string $hash)
@@ -346,9 +343,7 @@ class CommLinkSearchController extends AbstractApiV2Controller
     /**
      * Get the image hashes matching the provided hash method and hamming distance
      *
-     * @param array $hashes Image hash split in the middle and hex decoded
-     *
-     * @return \Illuminate\Support\Collection
+     * @param  array  $hashes  Image hash split in the middle and hex decoded
      */
     private function getHashesFromSQLStore(array $hashes): \Illuminate\Support\Collection
     {
@@ -356,7 +351,7 @@ class CommLinkSearchController extends AbstractApiV2Controller
             ->with('image')
             ->select('comm_link_image_hashes.comm_link_image_id')
             ->selectRaw(
-                <<<SQL
+                <<<'SQL'
 (BIT_COUNT(CONV(HEX(pdq_hash1), 16, 10) ^ CONV(?, 16, 10)) +
 BIT_COUNT(CONV(HEX(pdq_hash2), 16, 10) ^ CONV(?, 16, 10)) +
 BIT_COUNT(CONV(HEX(pdq_hash3), 16, 10) ^ CONV(?, 16, 10)) +

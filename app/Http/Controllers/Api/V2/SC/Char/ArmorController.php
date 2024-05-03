@@ -32,6 +32,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
             enum: [
                 'shops',
                 'shops.items',
+                'variants',
             ]
         ),
     ),
@@ -57,7 +58,6 @@ class ArmorController extends AbstractApiV2Controller
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),
             new OA\Parameter(ref: '#/components/parameters/clothing_filter_v2'),
-            new OA\Parameter(ref: '#/components/parameters/variant_includes_v2'),
             new OA\Parameter(name: 'filter[variants]', in: 'query', schema: new OA\Schema(type: 'boolean')),
         ],
         responses: [
@@ -90,7 +90,6 @@ class ArmorController extends AbstractApiV2Controller
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/locale'),
             new OA\Parameter(ref: '#/components/parameters/clothing_includes_v2'),
-            new OA\Parameter(ref: '#/components/parameters/variant_includes_v2'),
             new OA\Parameter(
                 name: 'armor',
                 in: 'path',
@@ -105,10 +104,7 @@ class ArmorController extends AbstractApiV2Controller
             new OA\Response(
                 response: 200,
                 description: 'An Armor Item',
-                content: new OA\JsonContent(
-                    type: 'array',
-                    items: new OA\Items(ref: '#/components/schemas/item_v2')
-                )
+                content: new OA\JsonContent(ref: '#/components/schemas/item_v2')
             ),
         ]
     )]

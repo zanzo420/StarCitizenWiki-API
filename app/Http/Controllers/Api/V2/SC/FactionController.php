@@ -64,10 +64,7 @@ class FactionController extends AbstractApiV2Controller
             new OA\Response(
                 response: 200,
                 description: 'A Faction and its relations',
-                content: new OA\JsonContent(
-                    type: 'array',
-                    items: new OA\Items(ref: '#/components/schemas/faction_v2')
-                )
+                content: new OA\JsonContent(ref: '#/components/schemas/faction_v2')
             ),
         ]
     )]

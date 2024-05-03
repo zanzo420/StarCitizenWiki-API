@@ -37,7 +37,7 @@ class VehicleWeaponController extends AbstractApiV2Controller
                     type: 'array',
                     items: new OA\Items(ref: '#/components/schemas/item_link_v2')
                 )
-            )
+            ),
         ]
     )]
     public function index(Request $request): AnonymousResourceCollection
@@ -77,11 +77,8 @@ class VehicleWeaponController extends AbstractApiV2Controller
             new OA\Response(
                 response: 200,
                 description: 'A Vehicle Weapon',
-                content: new OA\JsonContent(
-                    type: 'array',
-                    items: new OA\Items(ref: '#/components/schemas/vehicle_weapon_v2')
-                )
-            )
+                content: new OA\JsonContent(ref: '#/components/schemas/vehicle_weapon_v2')
+            ),
         ]
     )]
     public function show(Request $request): AbstractBaseResource

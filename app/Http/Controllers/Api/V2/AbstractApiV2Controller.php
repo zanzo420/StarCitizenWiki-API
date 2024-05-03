@@ -81,6 +81,7 @@ use Spatie\QueryBuilder\AllowedInclude;
             enum: [
                 'shops',
                 'shops.items',
+                'variants',
             ]
         ),
     ),
@@ -138,7 +139,7 @@ abstract class AbstractApiV2Controller extends Controller
     /**
      * AbstractApiController constructor.
      *
-     * @param Request $request API Request
+     * @param  Request  $request  API Request
      */
     public function __construct(Request $request)
     {
@@ -184,15 +185,13 @@ abstract class AbstractApiV2Controller extends Controller
      */
     private function processLocale(): void
     {
-        if ($this->request->has(self::LOCALE) && null !== $this->request->get(self::LOCALE, null)) {
+        if ($this->request->has(self::LOCALE) && $this->request->get(self::LOCALE, null) !== null) {
             $this->setLocale($this->request->get(self::LOCALE));
         }
     }
 
     /**
      * Set the Locale
-     *
-     * @param string $localeCode
      */
     protected function setLocale(string $localeCode): void
     {
@@ -204,9 +203,6 @@ abstract class AbstractApiV2Controller extends Controller
 
     /**
      * Cleans the name for query use
-     *
-     * @param string $name
-     * @return string
      */
     protected function cleanQueryName(string $name): string
     {

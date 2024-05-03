@@ -103,10 +103,7 @@ class PersonalWeaponController extends AbstractApiV2Controller
             new OA\Response(
                 response: 200,
                 description: 'A Personal Weapon',
-                content: new OA\JsonContent(
-                    type: 'array',
-                    items: new OA\Items(ref: '#/components/schemas/personal_weapon_v2')
-                )
+                content: new OA\JsonContent(ref: '#/components/schemas/personal_weapon_v2')
             ),
         ]
     )]

@@ -35,7 +35,7 @@ class WeaponAttachmentController extends AbstractApiV2Controller
                     type: 'array',
                     items: new OA\Items(ref: '#/components/schemas/item_link_v2')
                 )
-            )
+            ),
         ]
     )]
     public function index(Request $request): AnonymousResourceCollection
@@ -68,11 +68,8 @@ class WeaponAttachmentController extends AbstractApiV2Controller
             new OA\Response(
                 response: 200,
                 description: 'An Attachment Item',
-                content: new OA\JsonContent(
-                    type: 'array',
-                    items: new OA\Items(ref: '#/components/schemas/item_v2')
-                )
-            )
+                content: new OA\JsonContent(ref: '#/components/schemas/item_v2')
+            ),
         ]
     )]
     public function show(Request $request): AbstractBaseResource

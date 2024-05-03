@@ -61,10 +61,7 @@ class MissionGiverController extends AbstractApiV2Controller
             new OA\Response(
                 response: 200,
                 description: 'A Mission Giver',
-                content: new OA\JsonContent(
-                    type: 'array',
-                    items: new OA\Items(ref: '#/components/schemas/mission_giver_v2')
-                )
+                content: new OA\JsonContent(ref: '#/components/schemas/mission_giver_v2')
             ),
         ]
     )]

@@ -18,7 +18,7 @@ class MissionController extends AbstractApiV2Controller
 {
     #[OA\Get(
         path: '/api/v2/missions',
-        tags: ['In-Game', 'Mission'],
+        tags: ['In-Game', 'Missions'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),
@@ -53,7 +53,7 @@ class MissionController extends AbstractApiV2Controller
 
     #[OA\Get(
         path: '/api/v2/missions/{mission}',
-        tags: ['In-Game', 'Mission'],
+        tags: ['In-Game', 'Missions'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/locale'),
             new OA\Parameter(
@@ -70,10 +70,7 @@ class MissionController extends AbstractApiV2Controller
             new OA\Response(
                 response: 200,
                 description: 'A Mission',
-                content: new OA\JsonContent(
-                    type: 'array',
-                    items: new OA\Items(ref: '#/components/schemas/mission_v2')
-                )
+                content: new OA\JsonContent(ref: '#/components/schemas/mission_v2')
             ),
         ]
     )]

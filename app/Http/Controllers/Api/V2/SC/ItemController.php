@@ -30,7 +30,6 @@ class ItemController extends AbstractApiV2Controller
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),
             new OA\Parameter(ref: '#/components/parameters/commodity_includes_v2'),
-            new OA\Parameter(ref: '#/components/parameters/variant_includes_v2'),
             new OA\Parameter(name: 'filter[variants]', in: 'query', schema: new OA\Schema(type: 'boolean')),
             new OA\Parameter(name: 'filter[type]', in: 'query', schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'filter[sub_type]', in: 'query', schema: new OA\Schema(type: 'string')),
@@ -70,7 +69,6 @@ class ItemController extends AbstractApiV2Controller
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/locale'),
             new OA\Parameter(ref: '#/components/parameters/commodity_includes_v2'),
-            new OA\Parameter(ref: '#/components/parameters/variant_includes_v2'),
             new OA\Parameter(
                 name: 'item',
                 in: 'path',
@@ -85,10 +83,7 @@ class ItemController extends AbstractApiV2Controller
             new OA\Response(
                 response: 200,
                 description: 'An Item',
-                content: new OA\JsonContent(
-                    type: 'array',
-                    items: new OA\Items(ref: '#/components/schemas/item_v2')
-                )
+                content: new OA\JsonContent(ref: '#/components/schemas/item_v2')
             ),
         ]
     )]
@@ -162,7 +157,6 @@ class ItemController extends AbstractApiV2Controller
             new OA\Parameter(ref: '#/components/parameters/limit'),
             new OA\Parameter(ref: '#/components/parameters/locale'),
             new OA\Parameter(ref: '#/components/parameters/commodity_includes_v2'),
-            new OA\Parameter(ref: '#/components/parameters/variant_includes_v2'),
             new OA\Parameter(name: 'filter[variants]', in: 'query', schema: new OA\Schema(type: 'boolean')),
             new OA\Parameter(name: 'filter[type]', in: 'query', schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'filter[sub_type]', in: 'query', schema: new OA\Schema(type: 'string')),

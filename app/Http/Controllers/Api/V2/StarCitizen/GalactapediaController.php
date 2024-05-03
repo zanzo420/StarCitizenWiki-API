@@ -42,7 +42,7 @@ class GalactapediaController extends AbstractApiV2Controller
                     type: 'array',
                     items: new OA\Items(ref: '#/components/schemas/galactapedia_article_v2')
                 )
-            )
+            ),
         ]
     )]
     public function index(Request $request): AnonymousResourceCollection
@@ -102,14 +102,14 @@ class GalactapediaController extends AbstractApiV2Controller
         ],
         responses: [
             new OA\Response(
-                ref: '#/components/schemas/galactapedia_article_v2',
                 response: 200,
                 description: 'A singular Article',
+                content: new OA\JsonContent(ref: '#/components/schemas/galactapedia_article_v2')
             ),
             new OA\Response(
                 response: 404,
                 description: 'No Article with specified ID found.',
-            )
+            ),
         ]
     )]
     public function show(Request $request): AbstractBaseResource
@@ -149,7 +149,7 @@ class GalactapediaController extends AbstractApiV2Controller
                         type: 'object',
                     ),
                     example: '{"query": "Banu"}',
-                )
+                ),
             ]
         ),
         tags: ['Galactapedia', 'RSI-Website'],
@@ -165,7 +165,7 @@ class GalactapediaController extends AbstractApiV2Controller
             new OA\Response(
                 response: 404,
                 description: 'No Article found.',
-            )
+            ),
         ],
     )]
     public function search(Request $request): AnonymousResourceCollection
