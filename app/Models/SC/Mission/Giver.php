@@ -39,4 +39,9 @@ class Giver extends AbstractHasTranslations
             'uuid',
         );
     }
+
+    public function missions(): HasMany
+    {
+        return $this->hasMany(Mission::class, 'giver_id', 'id');
+    }
 }

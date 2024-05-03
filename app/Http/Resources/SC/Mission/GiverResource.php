@@ -33,6 +33,13 @@ use OpenApi\Attributes as OA;
 )]
 class GiverResource extends AbstractTranslationResource
 {
+    public static function validIncludes(): array
+    {
+        return [
+            'missions',
+        ];
+    }
+
     /**
      * Transform the resource into an array.
      *
@@ -50,6 +57,7 @@ class GiverResource extends AbstractTranslationResource
             'medium_cooldown' => $this->medium_cooldown,
             'long_cooldown' => $this->long_cooldown,
             'description' => $this->getTranslation($this, $request),
+            'missions' => $this->whenLoaded('missions', fn () => MissionLinkResource::collection($this->missions)),
         ];
     }
 }

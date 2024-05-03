@@ -124,6 +124,10 @@ Route::group(
         Route::get('missions/{mission}', 'MissionController@show')->name('missions.show')
             ->where('mission', '.*');
 
+        Route::get('mission-givers', 'MissionGiverController@index')->name('mission-givers.index');
+        Route::get('mission-givers/{giver}', 'MissionGiverController@show')->name('mission-givers.show')
+            ->where('giver', '.*');
+
         Route::get('factions', 'FactionController@index')->name('faction.index');
         Route::get('factions/{faction}', 'FactionController@show')->name('faction.show')
             ->where('faction', '.*');
