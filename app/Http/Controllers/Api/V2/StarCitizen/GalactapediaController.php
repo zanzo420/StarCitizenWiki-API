@@ -152,7 +152,7 @@ class GalactapediaController extends AbstractApiV2Controller
                 ),
             ]
         ),
-        tags: ['Galactapedia', 'RSI-Website'],
+        tags: ['Galactapedia', 'RSI-Website', 'Search'],
         responses: [
             new OA\Response(
                 response: 200,

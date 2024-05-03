@@ -151,7 +151,7 @@ class ItemController extends AbstractApiV2Controller
                 ),
             ]
         ),
-        tags: ['In-Game', 'Item'],
+        tags: ['In-Game', 'Item', 'Search'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),

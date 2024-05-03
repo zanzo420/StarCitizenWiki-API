@@ -97,7 +97,7 @@ class CommLinkSearchController extends AbstractApiV2Controller
                 ),
             ]
         ),
-        tags: ['Comm-Links', 'RSI-Website'],
+        tags: ['Comm-Links', 'RSI-Website', 'Search'],
         responses: [
             new OA\Response(
                 response: 200,
@@ -160,7 +160,7 @@ class CommLinkSearchController extends AbstractApiV2Controller
                 ),
             ]
         ),
-        tags: ['Comm-Links', 'RSI-Website'],
+        tags: ['Comm-Links', 'RSI-Website', 'Search'],
         parameters: [
             new OA\Parameter(
                 name: 'similarity',

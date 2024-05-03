@@ -171,7 +171,7 @@ class VehicleController extends AbstractApiV2Controller
                 ),
             ]
         ),
-        tags: ['Vehicles', 'RSI-Website', 'In-Game'],
+        tags: ['Vehicles', 'RSI-Website', 'In-Game', 'Search'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),

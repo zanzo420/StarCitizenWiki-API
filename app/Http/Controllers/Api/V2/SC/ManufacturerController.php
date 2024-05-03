@@ -102,7 +102,7 @@ class ManufacturerController extends AbstractApiV2Controller
 
     #[OA\Post(
         path: '/api/v2/manufactureres/search',
-        tags: ['In-Game', 'Manufacturer'],
+        tags: ['In-Game', 'Manufacturer', 'Search'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),
