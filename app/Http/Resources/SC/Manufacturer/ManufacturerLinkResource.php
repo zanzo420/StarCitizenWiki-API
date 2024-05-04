@@ -15,9 +15,9 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'name', type: 'string'),
         new OA\Property(property: 'code', type: 'string'),
         new OA\Property(property: 'link', type: 'string'),
-        new OA\Property(property: 'ships_count', type: 'integer'),
-        new OA\Property(property: 'vehicles_count', type: 'integer'),
-        new OA\Property(property: 'items_count', type: 'integer'),
+        new OA\Property(property: 'ships_count', type: 'integer', nullable: true),
+        new OA\Property(property: 'vehicles_count', type: 'integer', nullable: true),
+        new OA\Property(property: 'items_count', type: 'integer', nullable: true),
     ],
     type: 'object'
 )]
@@ -26,9 +26,10 @@ class ManufacturerLinkResource extends AbstractBaseResource
     /**
      * Transform the resource collection into an array.
      *
-     * @param  Request  $request
+     * @param Request $request
+     * @return array
      */
-    public function toArray($request): array
+    public function toArray(Request $request): array
     {
         $include = $request->get('include', '');
         if (empty($include)) {

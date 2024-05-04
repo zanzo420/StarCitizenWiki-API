@@ -8,6 +8,16 @@ use App\Http\Resources\AbstractBaseResource;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
+
+#[OA\Schema(
+    schema: 'clothing_item_v2',
+    title: 'Clothing Item',
+    allOf: [
+        new OA\Schema(ref: '#/components/schemas/item_base_v2'),
+        new OA\Schema(properties: [new OA\Property(property: 'clothing', ref: '#/components/schemas/clothing_v2')], type: 'object'),
+    ],
+)]
+
 #[OA\Schema(
     schema: 'clothing_v2',
     title: 'Clothing',
@@ -50,7 +60,6 @@ use OpenApi\Attributes as OA;
             items: new OA\Items(ref: '#/components/schemas/clothing_resistance_v2'),
             nullable: true,
         ),
-        new OA\Property(property: 'base_variant', type: 'string', nullable: true),
     ],
     type: 'object'
 )]
@@ -64,12 +73,7 @@ class ClothingResource extends AbstractBaseResource
         ];
     }
 
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param  Request  $request
-     */
-    public function toArray($request): array
+    public function toArray(Request $request): array
     {
         $typeKey = 'armor_type';
         if (str_contains($this->type, 'Char_Clothing')) {

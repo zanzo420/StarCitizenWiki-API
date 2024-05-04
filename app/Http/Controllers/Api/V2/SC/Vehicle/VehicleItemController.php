@@ -23,7 +23,7 @@ class VehicleItemController extends AbstractApiV2Controller
 {
     #[OA\Get(
         path: '/api/v2/vehicle-items',
-        tags: ['Vehicles', 'In-Game'],
+        tags: ['Vehicles', 'In-Game', 'Items'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),
@@ -68,7 +68,7 @@ class VehicleItemController extends AbstractApiV2Controller
 
     #[OA\Get(
         path: '/api/v2/vehicle-items/{item}',
-        tags: ['Vehicles', 'In-Game'],
+        tags: ['Vehicles', 'In-Game', 'Items'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/locale'),
             new OA\Parameter(ref: '#/components/parameters/commodity_includes_v2'),

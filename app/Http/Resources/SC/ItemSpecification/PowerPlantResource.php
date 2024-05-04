@@ -18,13 +18,7 @@ use OpenApi\Attributes as OA;
 )]
 class PowerPlantResource extends AbstractBaseResource
 {
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
-    public function toArray($request): array
+    public function toArray(Request $request): array
     {
         return [
             'power_output' => $this->power_output,

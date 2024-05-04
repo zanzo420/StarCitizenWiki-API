@@ -24,7 +24,7 @@ class VehicleWeaponController extends AbstractApiV2Controller
 {
     #[OA\Get(
         path: '/api/v2/vehicle-weapons',
-        tags: ['Vehicles', 'In-Game'],
+        tags: ['Vehicles', 'In-Game', 'Weapons'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),
@@ -59,7 +59,7 @@ class VehicleWeaponController extends AbstractApiV2Controller
 
     #[OA\Get(
         path: '/api/v2/vehicle-weapons/{weapon}',
-        tags: ['Vehicles', 'In-Game'],
+        tags: ['Vehicles', 'In-Game', 'Weapons'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/locale'),
             new OA\Parameter(ref: '#/components/parameters/commodity_includes_v2'),

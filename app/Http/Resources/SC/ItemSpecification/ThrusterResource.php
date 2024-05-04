@@ -21,13 +21,7 @@ use OpenApi\Attributes as OA;
 )]
 class ThrusterResource extends AbstractBaseResource
 {
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
-    public function toArray($request): array
+    public function toArray(Request $request): array
     {
         return [
             'thrust_capacity' => $this->thrust_capacity,

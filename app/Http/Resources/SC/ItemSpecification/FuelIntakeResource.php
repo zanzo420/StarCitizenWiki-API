@@ -19,13 +19,7 @@ use OpenApi\Attributes as OA;
 )]
 class FuelIntakeResource extends AbstractBaseResource
 {
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
-    public function toArray($request): array
+    public function toArray(Request $request): array
     {
         return [
             'fuel_push_rate' => $this->fuel_push_rate,

@@ -32,13 +32,7 @@ use OpenApi\Attributes as OA;
 )]
 class QuantumDriveResource extends AbstractBaseResource
 {
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
-    public function toArray($request): array
+    public function toArray(Request $request): array
     {
         return [
             'quantum_fuel_requirement' => $this->quantum_fuel_requirement,

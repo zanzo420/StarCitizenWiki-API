@@ -53,7 +53,7 @@ class ArmorController extends AbstractApiV2Controller
 {
     #[OA\Get(
         path: '/api/v2/armor',
-        tags: ['Clothing', 'In-Game', 'Item'],
+        tags: ['Clothing', 'In-Game', 'Items'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),
@@ -86,7 +86,7 @@ class ArmorController extends AbstractApiV2Controller
 
     #[OA\Get(
         path: '/api/v2/armor/{armor}',
-        tags: ['Clothing', 'In-Game', 'Item'],
+        tags: ['Clothing', 'In-Game', 'Items'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/locale'),
             new OA\Parameter(ref: '#/components/parameters/clothing_includes_v2'),
@@ -104,7 +104,7 @@ class ArmorController extends AbstractApiV2Controller
             new OA\Response(
                 response: 200,
                 description: 'An Armor Item',
-                content: new OA\JsonContent(ref: '#/components/schemas/item_v2')
+                content: new OA\JsonContent(ref: '#/components/schemas/clothing_item_v2')
             ),
         ]
     )]

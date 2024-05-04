@@ -12,6 +12,15 @@ use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
+    schema: 'personal_weapon_item_v2',
+    title: 'Personal Weapon Item',
+    allOf: [
+        new OA\Schema(ref: '#/components/schemas/item_base_v2'),
+        new OA\Schema(properties: [new OA\Property(property: 'personal_weapon', ref: '#/components/schemas/personal_weapon_v2')], type: 'object'),
+    ],
+)]
+
+#[OA\Schema(
     schema: 'personal_weapon_v2',
     title: 'Personal Weapon',
     description: 'Personal Weapon',
@@ -35,7 +44,6 @@ use OpenApi\Attributes as OA;
             nullable: true,
         ),
         new OA\Property(property: 'ammunition', ref: '#/components/schemas/ammunition_v2', nullable: true),
-
     ],
     type: 'object'
 )]
@@ -49,12 +57,6 @@ class PersonalWeaponResource extends AbstractBaseResource
         ];
     }
 
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
     public function toArray(Request $request): array
     {
         $data = [

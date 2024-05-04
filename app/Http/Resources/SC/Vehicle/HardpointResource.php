@@ -46,9 +46,6 @@ class HardpointResource extends AbstractBaseResource
         ];
     }
 
-    /**
-     * Transform the resource collection into an array.
-     */
     public function toArray(Request $request): array
     {
         $data = [

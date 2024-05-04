@@ -25,7 +25,7 @@ class PersonalWeaponController extends AbstractApiV2Controller
 {
     #[OA\Get(
         path: '/api/v2/weapons',
-        tags: ['In-Game', 'Item', 'Weapon'],
+        tags: ['In-Game', 'Items', 'Weapons'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),
@@ -67,7 +67,7 @@ class PersonalWeaponController extends AbstractApiV2Controller
 
     #[OA\Get(
         path: '/api/v2/weapons/{weapon}',
-        tags: ['In-Game', 'Item', 'Weapon'],
+        tags: ['In-Game', 'Items', 'Weapons'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/locale'),
             new OA\Parameter(
@@ -103,7 +103,7 @@ class PersonalWeaponController extends AbstractApiV2Controller
             new OA\Response(
                 response: 200,
                 description: 'A Personal Weapon',
-                content: new OA\JsonContent(ref: '#/components/schemas/personal_weapon_v2')
+                content: new OA\JsonContent(ref: '#/components/schemas/personal_weapon_item_v2')
             ),
         ]
     )]

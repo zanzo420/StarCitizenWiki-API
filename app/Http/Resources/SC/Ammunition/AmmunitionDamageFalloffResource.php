@@ -23,9 +23,6 @@ use OpenApi\Attributes as OA;
 )]
 class AmmunitionDamageFalloffResource extends AbstractBaseResource
 {
-    /**
-     * Transform the resource collection into an array.
-     */
     public function toArray(Request $request): array
     {
 

@@ -23,7 +23,7 @@ class FoodController extends AbstractApiV2Controller
 {
     #[OA\Get(
         path: '/api/v2/food',
-        tags: ['In-Game', 'Item', 'Consumable'],
+        tags: ['In-Game', 'Items', 'Consumables'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),
@@ -51,7 +51,7 @@ class FoodController extends AbstractApiV2Controller
 
     #[OA\Get(
         path: '/api/v2/food/{food}',
-        tags: ['In-Game', 'Item', 'Consumable'],
+        tags: ['In-Game', 'Items', 'Consumables'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/locale'),
             new OA\Parameter(ref: '#/components/parameters/commodity_includes_v2'),
@@ -69,7 +69,7 @@ class FoodController extends AbstractApiV2Controller
             new OA\Response(
                 response: 200,
                 description: 'A Food Item',
-                content: new OA\JsonContent(ref: '#/components/schemas/food_v2')
+                content: new OA\JsonContent(ref: '#/components/schemas/food_item_v2')
             ),
         ]
     )]

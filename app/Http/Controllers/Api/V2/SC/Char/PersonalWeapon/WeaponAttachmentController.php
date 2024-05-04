@@ -21,7 +21,7 @@ class WeaponAttachmentController extends AbstractApiV2Controller
 {
     #[OA\Get(
         path: '/api/v2/weapon-attachments',
-        tags: ['In-Game', 'Item', 'Weapon'],
+        tags: ['In-Game', 'Items', 'Weapons'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),
@@ -50,7 +50,7 @@ class WeaponAttachmentController extends AbstractApiV2Controller
 
     #[OA\Get(
         path: '/api/v2/weapon-attachments/{attachment}',
-        tags: ['In-Game', 'Item', 'Weapon'],
+        tags: ['In-Game', 'Items', 'Weapons'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/locale'),
             new OA\Parameter(ref: '#/components/parameters/commodity_includes_v2'),
@@ -68,7 +68,7 @@ class WeaponAttachmentController extends AbstractApiV2Controller
             new OA\Response(
                 response: 200,
                 description: 'An Attachment Item',
-                content: new OA\JsonContent(ref: '#/components/schemas/item_v2')
+                content: new OA\JsonContent(ref: '#/components/schemas/personal_weapon_attachment_item_v2')
             ),
         ]
     )]

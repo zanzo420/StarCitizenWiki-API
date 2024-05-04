@@ -77,11 +77,6 @@ use OpenApi\Attributes as OA;
 )]
 class MissionResource extends AbstractTranslationResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [

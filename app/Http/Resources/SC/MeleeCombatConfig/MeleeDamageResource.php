@@ -20,12 +20,6 @@ use OpenApi\Attributes as OA;
 )]
 class MeleeDamageResource extends AbstractBaseResource
 {
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
     public function toArray(Request $request): array
     {
         return [

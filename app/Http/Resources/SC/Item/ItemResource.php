@@ -39,128 +39,164 @@ use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: 'item_v2',
-    title: 'Item',
+    schema: 'metadata_v2',
+    title: 'Metadata',
+    description: 'Information about version and update date',
     properties: [
-        new OA\Property(property: 'uuid', type: 'string', nullable: true),
-        new OA\Property(property: 'name', type: 'string', nullable: true),
-        new OA\Property(property: 'class_name', type: 'string', nullable: true),
         new OA\Property(
-            property: 'description',
-            oneOf: [
-                new OA\Schema(type: 'string'),
-                new OA\Schema(
-                    type: 'array',
-                    items: new OA\Items(ref: '#/components/schemas/translation_v2'),
-                ),
-            ],
+            property: 'updated_at',
+            description: 'Timestamp this data was last updated.',
+            type: 'datetime',
         ),
-        new OA\Property(property: 'size', type: 'integer', nullable: true),
-        new OA\Property(property: 'grade', type: 'string', nullable: true),
-        new OA\Property(property: 'class', type: 'string', nullable: true),
-        new OA\Property(property: 'mass', type: 'double', nullable: true),
-        new OA\Property(property: 'is_base_variant', type: 'boolean'),
-        new OA\Property(
-            property: 'description_data',
-            type: 'array',
-            items: new OA\Items(ref: '#/components/schemas/item_description_data_v2'),
-            nullable: true
-        ),
-        new OA\Property(property: 'manufacturer_description', type: 'string', nullable: true),
-        new OA\Property(property: 'manufacturer', ref: '#/components/schemas/manufacturer_link_v2'),
-        new OA\Property(property: 'type', type: 'string', nullable: true),
-        new OA\Property(property: 'sub_type', type: 'string', nullable: true),
-        new OA\Property(property: 'min_size', type: 'integer', nullable: true),
-        new OA\Property(property: 'max_size', type: 'integer', nullable: true),
-        new OA\Property(property: 'max_mounts', type: 'integer', nullable: true),
-        new OA\Property(property: 'max_missiles', type: 'integer', nullable: true),
-        new OA\Property(property: 'max_bombs', type: 'integer', nullable: true),
-        new OA\Property(property: 'armor', ref: '#/components/schemas/armor_v2', nullable: true),
-        new OA\Property(property: 'bomb', ref: '#/components/schemas/bomb_v2', nullable: true),
-        new OA\Property(property: 'barrel_attach', ref: '#/components/schemas/barrel_attach_v2', nullable: true),
-        new OA\Property(property: 'clothing', ref: '#/components/schemas/clothing_v2', nullable: true),
-        new OA\Property(property: 'cooler', ref: '#/components/schemas/cooler_v2', nullable: true),
-        new OA\Property(property: 'emp', ref: '#/components/schemas/emp_v2', nullable: true),
-        new OA\Property(property: 'flight_controller', ref: '#/components/schemas/flight_controller_v2', nullable: true),
-        new OA\Property(property: 'food', ref: '#/components/schemas/food_v2', nullable: true),
-        new OA\Property(property: 'fuel_intake', ref: '#/components/schemas/fuel_intake_v2', nullable: true),
-        new OA\Property(property: 'fuel_tank', ref: '#/components/schemas/fuel_tank_v2', nullable: true),
-        new OA\Property(property: 'grenade', ref: '#/components/schemas/grenade_v2', nullable: true),
-        new OA\Property(property: 'hacking_chip', ref: '#/components/schemas/hacking_chip_v2', nullable: true),
-        new OA\Property(property: 'iron_sight', ref: '#/components/schemas/iron_sight_v2', nullable: true),
-        new OA\Property(property: 'knife', ref: '#/components/schemas/knife_v2', nullable: true),
-        new OA\Property(property: 'mining_laser', ref: '#/components/schemas/mining_laser_v2', nullable: true),
-        new OA\Property(property: 'mining_module', ref: '#/components/schemas/mining_module_v2', nullable: true),
-        new OA\Property(property: 'missile', ref: '#/components/schemas/missile_v2', nullable: true),
-        new OA\Property(property: 'personal_weapon', ref: '#/components/schemas/personal_weapon_v2', nullable: true),
-        new OA\Property(property: 'personal_weapon_magazine', ref: '#/components/schemas/personal_weapon_magazine_v2', nullable: true),
-        new OA\Property(property: 'power_plant', ref: '#/components/schemas/power_plant_v2', nullable: true),
-        new OA\Property(property: 'quantum_drive', ref: '#/components/schemas/quantum_drive_v2', nullable: true),
-        new OA\Property(property: 'quantum_interdiction_generator', ref: '#/components/schemas/qig_v2', nullable: true),
-        new OA\Property(property: 'self_destruct', ref: '#/components/schemas/self_destruct_v2', nullable: true),
-        new OA\Property(property: 'shield', ref: '#/components/schemas/shield_v2', nullable: true),
-        new OA\Property(property: 'thruster', ref: '#/components/schemas/thruster_v2', nullable: true),
-        new OA\Property(property: 'vehicle_weapon', ref: '#/components/schemas/vehicle_weapon_v2', nullable: true),
-        new OA\Property(property: 'dimension', ref: '#/components/schemas/item_dimension_v2'),
-        new OA\Property(property: 'inventory', ref: '#/components/schemas/item_container_v2', nullable: true),
-        new OA\Property(
-            property: 'tags',
-            type: 'array',
-            items: new OA\Items(type: 'string'),
-            nullable: true,
-        ),
-        new OA\Property(
-            property: 'required_tags',
-            type: 'array',
-            items: new OA\Items(type: 'string'),
-            nullable: true,
-        ),
-        new OA\Property(
-            property: 'entity_tags',
-            type: 'array',
-            items: new OA\Items(type: 'string'),
-            nullable: true,
-        ),
-        new OA\Property(
-            property: 'interactions',
-            type: 'array',
-            items: new OA\Items(type: 'string'),
-            nullable: true,
-        ),
-        new OA\Property(property: 'ports', ref: '#/components/schemas/item_port_data_v2', nullable: true),
-        new OA\Property(property: 'heat', ref: '#/components/schemas/item_heat_data_v2', nullable: true),
-        new OA\Property(property: 'power', ref: '#/components/schemas/item_power_data_v2', nullable: true),
-        new OA\Property(property: 'distortion', ref: '#/components/schemas/item_distortion_data_v2', nullable: true),
-        new OA\Property(property: 'durability', ref: '#/components/schemas/item_durability_data_v2', nullable: true),
-        new OA\Property(property: 'weapon_modifier', ref: '#/components/schemas/item_weapon_modifier_data_v2', nullable: true),
-        new OA\Property(property: 'shops', ref: '#/components/schemas/shop_v2', nullable: true),
-        new OA\Property(property: 'base_variant', ref: '#/components/schemas/item_link_v2', nullable: true),
-        new OA\Property(
-            property: 'variants',
-            type: 'array',
-            items: new OA\Items(ref: '#/components/schemas/item_link_v2'),
-            nullable: true
-        ),
-        new OA\Property(property: 'updated_at', type: 'double', nullable: true),
         new OA\Property(
             property: 'version',
             description: 'The Game Version this item exists in.',
-            type: 'double',
-            nullable: true
+            type: 'string',
         ),
     ],
     type: 'object'
 )]
+
+#[OA\Schema(
+    schema: 'item_base_v2',
+    title: 'Base Item',
+    allOf: [
+        new OA\Schema(
+            properties: [
+                new OA\Property(property: 'uuid', type: 'string'),
+                new OA\Property(property: 'name', type: 'string'),
+                new OA\Property(property: 'class_name', type: 'string'),
+                new OA\Property(
+                    property: 'description',
+                    nullable: true,
+                    oneOf: [
+                        new OA\Schema(type: 'string'),
+                        new OA\Schema(
+                            type: 'array',
+                            items: new OA\Items(ref: '#/components/schemas/translation_v2'),
+                        ),
+                    ],
+                ),
+                new OA\Property(property: 'size', type: 'integer', nullable: true),
+                new OA\Property(property: 'mass', type: 'double', nullable: true),
+                new OA\Property(property: 'is_base_variant', type: 'boolean'),
+                new OA\Property(property: 'grade', type: 'string', nullable: true),
+                new OA\Property(property: 'class', type: 'string', nullable: true),
+                new OA\Property(
+                    property: 'description_data',
+                    type: 'array',
+                    items: new OA\Items(ref: '#/components/schemas/item_description_data_v2'),
+                    nullable: true
+                ),
+                new OA\Property(property: 'manufacturer_description', type: 'string', nullable: true),
+                new OA\Property(property: 'manufacturer', ref: '#/components/schemas/manufacturer_link_v2'),
+                new OA\Property(property: 'type', type: 'string', nullable: true),
+                new OA\Property(property: 'sub_type', type: 'string', nullable: true),
+                new OA\Property(property: 'dimension', ref: '#/components/schemas/item_dimension_v2'),
+                new OA\Property(property: 'inventory', ref: '#/components/schemas/item_container_v2', nullable: true),
+                new OA\Property(
+                    property: 'tags',
+                    type: 'array',
+                    items: new OA\Items(type: 'string'),
+                    nullable: true,
+                ),
+                new OA\Property(
+                    property: 'required_tags',
+                    type: 'array',
+                    items: new OA\Items(type: 'string'),
+                    nullable: true,
+                ),
+                new OA\Property(
+                    property: 'entity_tags',
+                    type: 'array',
+                    items: new OA\Items(type: 'string'),
+                    nullable: true,
+                ),
+                new OA\Property(
+                    property: 'interactions',
+                    type: 'array',
+                    items: new OA\Items(type: 'string'),
+                    nullable: true,
+                ),
+                new OA\Property(property: 'ports', ref: '#/components/schemas/item_port_data_v2', nullable: true),
+                new OA\Property(property: 'heat', ref: '#/components/schemas/item_heat_data_v2', nullable: true),
+                new OA\Property(property: 'power', ref: '#/components/schemas/item_power_data_v2', nullable: true),
+                new OA\Property(property: 'distortion', ref: '#/components/schemas/item_distortion_data_v2', nullable: true),
+                new OA\Property(property: 'durability', ref: '#/components/schemas/item_durability_data_v2', nullable: true),
+                new OA\Property(property: 'shops', ref: '#/components/schemas/shop_v2', nullable: true),
+                new OA\Property(property: 'base_variant', ref: '#/components/schemas/item_link_v2', nullable: true),
+                new OA\Property(
+                    property: 'variants',
+                    type: 'array',
+                    items: new OA\Items(ref: '#/components/schemas/item_link_v2'),
+                    nullable: true
+                ),
+            ],
+            type: 'object'
+        ),
+        new OA\Schema(ref: '#/components/schemas/metadata_v2'),
+    ],
+)]
+
+#[OA\Schema(
+    schema: 'item_v2',
+    title: 'Item',
+    description: 'An Item in Star Citizen',
+    type: 'object',
+    allOf: [
+        new OA\Schema(ref: '#/components/schemas/item_base_v2'),
+        new OA\Schema(
+            type: 'object',
+            oneOf: [
+                new OA\Schema(ref: '#/components/schemas/vehicle_item_specification_v2'),
+                new OA\Schema(ref: '#/components/schemas/personal_weapon_attachment_specification_v2'),
+                new OA\Schema(
+                    properties: [
+                        new OA\Property(property: 'clothing', ref: '#/components/schemas/clothing_v2'),
+                    ],
+                    type: 'object',
+                ),
+                new OA\Schema(
+                    properties: [
+                        new OA\Property(property: 'food', ref: '#/components/schemas/food_v2'),
+                    ],
+                    type: 'object',
+                ),
+                new OA\Schema(
+                    properties: [
+                        new OA\Property(property: 'grenade', ref: '#/components/schemas/grenade_v2'),
+                    ],
+                    type: 'object',
+                ),
+                new OA\Schema(
+                    properties: [
+                        new OA\Property(property: 'hacking_chip', ref: '#/components/schemas/hacking_chip_v2'),
+                    ],
+                    type: 'object',
+                ),
+                new OA\Schema(
+                    properties: [
+                        new OA\Property(property: 'knife', ref: '#/components/schemas/knife_v2'),
+                    ],
+                    type: 'object',
+                ),
+                new OA\Schema(
+                    properties: [
+                        new OA\Property(property: 'personal_weapon', ref: '#/components/schemas/personal_weapon_v2'),
+                    ],
+                    type: 'object',
+                ),
+            ]
+        ),
+    ]
+)]
 class ItemResource extends AbstractTranslationResource
 {
-    private bool $isVehicleItem;
-
     private bool $onlySimpleData;
 
     public function __construct($resource, bool $isVehicleItem = false, bool $onlyBaseData = false)
     {
         parent::__construct($resource);
-        $this->isVehicleItem = $isVehicleItem;
         $this->onlySimpleData = $onlyBaseData;
     }
 
@@ -172,9 +208,6 @@ class ItemResource extends AbstractTranslationResource
         ];
     }
 
-    /**
-     * Transform the resource collection into an array.
-     */
     public function toArray(Request $request): array
     {
         if ($this->uuid === null) {

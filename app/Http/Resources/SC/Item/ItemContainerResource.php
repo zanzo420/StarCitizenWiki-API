@@ -33,13 +33,7 @@ use OpenApi\Attributes as OA;
 )]
 class ItemContainerResource extends AbstractBaseResource
 {
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
-    public function toArray($request): array
+    public function toArray(Request $request): array
     {
         $unit = match ($this->unit) {
             2 => 'cSCU',

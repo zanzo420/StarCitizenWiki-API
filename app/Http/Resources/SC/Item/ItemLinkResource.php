@@ -14,36 +14,32 @@ use OpenApi\Attributes as OA;
     schema: 'item_link_v2',
     title: 'Item Link',
     description: 'Link information to an Item',
-    properties: [
-        new OA\Property(property: 'uuid', type: 'string'),
-        new OA\Property(property: 'name', type: 'string'),
-        new OA\Property(property: 'type', type: 'string'),
-        new OA\Property(property: 'sub_type', type: 'string', nullable: true),
-        new OA\Property(property: 'is_base_variant', type: 'boolean'),
-        new OA\Property(property: 'manufacturer', ref: '#/components/schemas/manufacturer_link_v2'),
-        new OA\Property(property: 'link', type: 'string'),
-        new OA\Property(property: 'base_variant', type: 'string', nullable: true),
-        new OA\Property(
-            property: 'variants',
-            type: 'array',
-            items: new OA\Items(ref: '#/components/schemas/item_link_v2'),
-            nullable: true,
+    type: 'object',
+    allOf: [
+        new OA\Schema(
+            properties: [
+                new OA\Property(property: 'uuid', type: 'string'),
+                new OA\Property(property: 'name', type: 'string'),
+                new OA\Property(property: 'type', type: 'string'),
+                new OA\Property(property: 'sub_type', type: 'string', nullable: true),
+                new OA\Property(property: 'is_base_variant', type: 'boolean'),
+                new OA\Property(property: 'manufacturer', ref: '#/components/schemas/manufacturer_link_v2'),
+                new OA\Property(property: 'link', type: 'string'),
+                new OA\Property(property: 'base_variant', type: 'string', nullable: true),
+                new OA\Property(
+                    property: 'variants',
+                    type: 'array',
+                    items: new OA\Items(ref: '#/components/schemas/item_link_v2'),
+                    nullable: true,
+                ),
+            ],
+            type: 'object',
         ),
-
-        new OA\Property(property: 'updated_at', type: 'string'),
-        new OA\Property(property: 'version', type: 'string'),
-
-    ],
-    type: 'object'
+        new OA\Schema(ref: '#/components/schemas/metadata_v2'),
+    ]
 )]
 class ItemLinkResource extends AbstractBaseResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
     public function toArray(Request $request): array
     {
         return [

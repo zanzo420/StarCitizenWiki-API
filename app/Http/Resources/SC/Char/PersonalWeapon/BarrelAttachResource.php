@@ -11,7 +11,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(
     schema: 'barrel_attach_v2',
     title: 'Barrel Attach',
-    description: 'Suppressors',
+    description: 'Suppressors, Laser Pointer, etc.',
     properties: [
         new OA\Property(property: 'type', type: 'string', nullable: true),
     ],
@@ -19,13 +19,7 @@ use OpenApi\Attributes as OA;
 )]
 class BarrelAttachResource extends AbstractBaseResource
 {
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
-    public function toArray($request): array
+    public function toArray(Request $request): array
     {
         return [
             'type' => $this->type ?? null,

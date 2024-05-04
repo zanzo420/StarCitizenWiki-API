@@ -14,6 +14,17 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(
     schema: 'vehicle_weapon_v2',
     title: 'Vehicle Weapon',
+    description: 'A weapon usable on a vehicle',
+    type: 'object',
+    allOf: [
+        new OA\Schema(ref: '#/components/schemas/item_base_v2'),
+        new OA\Schema(ref: '#/components/schemas/vehicle_weapon_specification_v2'),
+    ],
+)]
+
+#[OA\Schema(
+    schema: 'vehicle_weapon_specification_v2',
+    title: 'Vehicle Weapon',
     properties: [
         new OA\Property(property: 'class', type: 'string', nullable: true),
         new OA\Property(property: 'capacity', type: 'double', nullable: true),
@@ -37,8 +48,6 @@ use OpenApi\Attributes as OA;
             nullable: true
         ),
         new OA\Property(property: 'ammunition', ref: '#/components/schemas/ammunition_v2', nullable: true),
-        new OA\Property(property: 'updated_at', type: 'string', nullable: true),
-        new OA\Property(property: 'version', type: 'string', nullable: true),
     ],
     type: 'object'
 )]
@@ -55,12 +64,6 @@ class VehicleWeaponResource extends AbstractBaseResource
         ];
     }
 
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
     public function toArray(Request $request): array
     {
         return [
@@ -73,8 +76,6 @@ class VehicleWeaponResource extends AbstractBaseResource
             'damages' => WeaponDamageResource::collection($this->damages()),
             'regeneration' => new VehicleWeaponRegenResource($this->whenLoaded('regen')),
             'ammunition' => new AmmunitionResource($this->ammunition),
-            'updated_at' => $this->updated_at,
-            'version' => $this->version,
         ];
     }
 }

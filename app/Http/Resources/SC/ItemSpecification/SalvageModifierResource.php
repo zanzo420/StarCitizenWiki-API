@@ -20,13 +20,7 @@ use OpenApi\Attributes as OA;
 )]
 class SalvageModifierResource extends AbstractBaseResource
 {
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
-    public function toArray($request): array
+    public function toArray(Request $request): array
     {
         return [
             'salvage_speed_multiplier' => $this->salvage_speed_multiplier,

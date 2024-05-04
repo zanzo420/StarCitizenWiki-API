@@ -22,13 +22,7 @@ use OpenApi\Attributes as OA;
 )]
 class FlightControllerResource extends AbstractBaseResource
 {
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
-    public function toArray($request): array
+    public function toArray(Request $request): array
     {
         return [
             'scm_speed' => $this->scm_speed,

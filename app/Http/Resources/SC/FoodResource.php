@@ -9,6 +9,15 @@ use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
+    schema: 'food_item_v2',
+    title: 'Food Item',
+    allOf: [
+        new OA\Schema(ref: '#/components/schemas/item_base_v2'),
+        new OA\Schema(properties: [new OA\Property(property: 'food', ref: '#/components/schemas/food_v2')], type: 'object'),
+    ],
+)]
+
+#[OA\Schema(
     schema: 'food_v2',
     title: 'Food',
     properties: [
@@ -24,10 +33,8 @@ use OpenApi\Attributes as OA;
             items: new OA\Items(type: 'string'),
             nullable: true,
         ),
-        new OA\Property(property: 'updated_at', type: 'double', nullable: true),
-        new OA\Property(property: 'version', type: 'string', nullable: true),
     ],
-    type: 'object'
+    type: 'object',
 )]
 class FoodResource extends AbstractBaseResource
 {
@@ -40,13 +47,7 @@ class FoodResource extends AbstractBaseResource
         ];
     }
 
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
-    public function toArray($request): array
+    public function toArray(Request $request): array
     {
         return [
             'nutritional_density_rating' => $this->nutritional_density_rating,
@@ -58,8 +59,6 @@ class FoodResource extends AbstractBaseResource
             'effects' => $this->effects->map(function ($effect) {
                 return $effect->name;
             }),
-            'updated_at' => $this->updated_at,
-            'version' => $this->version,
         ];
     }
 }

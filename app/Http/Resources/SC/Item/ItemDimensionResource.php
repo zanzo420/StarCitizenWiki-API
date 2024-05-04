@@ -11,7 +11,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(
     schema: 'item_dimension_v2',
     title: 'Item Dimension',
-    description: 'Dimensions of an item as shown in the ui',
+    description: 'Dimensions of an item as shown in the UI',
     properties: [
         new OA\Property(property: 'width', type: 'double'),
         new OA\Property(property: 'height', type: 'double'),
@@ -33,12 +33,6 @@ use OpenApi\Attributes as OA;
 )]
 class ItemDimensionResource extends AbstractBaseResource
 {
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
     public function toArray(Request $request): array
     {
         $dim = $this->dimension;
@@ -56,7 +50,7 @@ class ItemDimensionResource extends AbstractBaseResource
                     'width' => $trueDim->width,
                     'height' => $trueDim->height,
                     'length' => $trueDim->length,
-                ]
+                ],
             ]),
         ];
     }

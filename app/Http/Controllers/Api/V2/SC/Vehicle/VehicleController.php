@@ -150,7 +150,7 @@ class VehicleController extends AbstractApiV2Controller
                 return new VehicleResource($vehicleModel);
             }
         } catch (ModelNotFoundException $e) {
-            throw new NotFoundHttpException('No Vehicle with specified name found.' . $request->vehicle);
+            throw new NotFoundHttpException('No Vehicle with specified name found.'.$request->vehicle);
         }
 
         return new \App\Http\Resources\SC\Vehicle\VehicleResource($vehicleModel);

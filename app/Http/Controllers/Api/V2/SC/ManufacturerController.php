@@ -23,7 +23,7 @@ class ManufacturerController extends AbstractApiV2Controller
 {
     #[OA\Get(
         path: '/api/v2/manufacturers',
-        tags: ['In-Game', 'Manufacturer'],
+        tags: ['In-Game', 'Manufacturers'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),
@@ -34,7 +34,9 @@ class ManufacturerController extends AbstractApiV2Controller
                 description: 'List of Manufacturers',
                 content: new OA\JsonContent(
                     type: 'array',
-                    items: new OA\Items(ref: '#/components/schemas/manufacturer_link_v2')
+                    items: new OA\Items(
+                        ref: '#/components/schemas/manufacturer_link_v2'
+                    )
                 )
             ),
         ]
@@ -54,7 +56,7 @@ class ManufacturerController extends AbstractApiV2Controller
 
     #[OA\Get(
         path: '/api/v2/manufacturers/{manufacturer}',
-        tags: ['In-Game', 'Manufacturer'],
+        tags: ['In-Game', 'Manufacturers'],
         parameters: [
             new OA\Parameter(
                 name: 'manufacturer',
@@ -102,7 +104,7 @@ class ManufacturerController extends AbstractApiV2Controller
 
     #[OA\Post(
         path: '/api/v2/manufactureres/search',
-        tags: ['In-Game', 'Manufacturer', 'Search'],
+        tags: ['In-Game', 'Manufacturers', 'Search'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),

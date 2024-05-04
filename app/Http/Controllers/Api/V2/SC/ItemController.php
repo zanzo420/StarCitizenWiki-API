@@ -25,7 +25,7 @@ class ItemController extends AbstractApiV2Controller
 {
     #[OA\Get(
         path: '/api/v2/items',
-        tags: ['In-Game', 'Item'],
+        tags: ['In-Game', 'Items'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),
@@ -49,7 +49,6 @@ class ItemController extends AbstractApiV2Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $query = QueryBuilder::for(Item::class, $request)
-            ->where('class_name', 'NOT LIKE', '%test_%')
             ->allowedFilters([
                 'type',
                 'sub_type',
@@ -65,7 +64,7 @@ class ItemController extends AbstractApiV2Controller
 
     #[OA\Get(
         path: '/api/v2/items/{item}',
-        tags: ['In-Game', 'Item'],
+        tags: ['In-Game', 'Items'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/locale'),
             new OA\Parameter(ref: '#/components/parameters/commodity_includes_v2'),
@@ -102,7 +101,6 @@ class ItemController extends AbstractApiV2Controller
 
         try {
             $item = QueryBuilder::for(Item::class, $request)
-                ->where('class_name', 'NOT LIKE', '%test_%')
                 ->where(function (Builder $query) use ($identifier) {
                     $query->where('uuid', $identifier)
                         ->orWhere('name', $identifier);
@@ -151,7 +149,7 @@ class ItemController extends AbstractApiV2Controller
                 ),
             ]
         ),
-        tags: ['In-Game', 'Item', 'Search'],
+        tags: ['In-Game', 'Items', 'Search'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/page'),
             new OA\Parameter(ref: '#/components/parameters/limit'),

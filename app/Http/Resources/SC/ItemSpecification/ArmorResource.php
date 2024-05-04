@@ -9,8 +9,9 @@ use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: 'armor_v2',
+    schema: 'vehicle_armor_v2',
     title: 'Vehicle Armor',
+    description: 'Armor of a vehicle.',
     properties: [
         new OA\Property(property: 'signal_infrared', type: 'double', nullable: true),
         new OA\Property(property: 'signal_electromagnetic', type: 'double', nullable: true),
@@ -26,13 +27,7 @@ use OpenApi\Attributes as OA;
 )]
 class ArmorResource extends AbstractBaseResource
 {
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
-    public function toArray($request): array
+    public function toArray(Request $request): array
     {
         return [
             'signal_infrared' => $this->signal_infrared,

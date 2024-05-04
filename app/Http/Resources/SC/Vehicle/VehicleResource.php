@@ -168,7 +168,7 @@ use OpenApi\Attributes as OA;
             type: 'object'
         ),
 
-        new OA\Property(property: 'armor', ref: '#/components/schemas/armor_v2', nullable: true),
+        new OA\Property(property: 'armor', ref: '#/components/schemas/vehicle_armor_v2', nullable: true),
         new OA\Property(
             property: 'foci',
             type: 'array',
@@ -261,9 +261,6 @@ class VehicleResource extends AbstractBaseResource
         ];
     }
 
-    /**
-     * Transform the resource into an array.
-     */
     public function toArray(Request $request): array
     {
         $includes = collect(explode(',', $request->get('include', '') ?? ''))
