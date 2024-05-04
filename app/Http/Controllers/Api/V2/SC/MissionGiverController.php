@@ -16,7 +16,7 @@ use Spatie\QueryBuilder\QueryBuilder;
 class MissionGiverController extends AbstractApiV2Controller
 {
     #[OA\Get(
-        path: '/api/v2/missions-givers',
+        path: '/api/v2/mission-givers',
         tags: ['In-Game', 'Missions'],
         parameters: [
             new OA\Parameter(ref: '#/components/parameters/page'),
