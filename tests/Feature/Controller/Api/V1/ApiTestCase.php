@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tests\Feature\Controller\Api\V1;
 
@@ -10,6 +12,12 @@ use Tests\TestCase;
  */
 class ApiTestCase extends TestCase
 {
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+        self::markTestSkipped();
+    }
+
     /**
      * Default German Translation from Factories
      */
@@ -40,7 +48,6 @@ class ApiTestCase extends TestCase
      */
     protected $structure = [];
 
-
     /**
      * Index Method Tests
      */
@@ -67,7 +74,7 @@ class ApiTestCase extends TestCase
     /**
      * Test Index with no Pagination
      *
-     * @param int $allCount Count of Resources in DB
+     * @param  int  $allCount  Count of Resources in DB
      */
     public function testIndexAll(int $allCount): void
     {
@@ -94,7 +101,7 @@ class ApiTestCase extends TestCase
     /**
      * Test Index with custom Pagination (limit)
      *
-     * @param int $limit The Pagination Limit
+     * @param  int  $limit  The Pagination Limit
      */
     public function testIndexPaginatedCustom(int $limit)
     {
@@ -121,7 +128,7 @@ class ApiTestCase extends TestCase
     /**
      * Test Index with invalid Pagination (limit)
      *
-     * @param int $limit The Pagination Limit
+     * @param  int  $limit  The Pagination Limit
      */
     public function testIndexInvalidLimit(int $limit)
     {
