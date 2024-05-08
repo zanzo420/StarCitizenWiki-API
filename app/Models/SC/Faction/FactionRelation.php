@@ -20,6 +20,10 @@ class FactionRelation extends Model
 
     public function faction(): BelongsTo
     {
-        return $this->belongsTo(Faction::class, 'other_faction_uuid', 'uuid');
+        return $this->belongsTo(
+            Faction::class,
+            'other_faction_uuid',
+            'uuid'
+        );
     }
 }

@@ -23,6 +23,11 @@ class Faction extends Model
 
     public function relations(): HasMany
     {
-        return $this->hasMany(FactionRelation::class);
+        return $this->hasMany(
+            FactionRelation::class,
+            'faction_id',
+            'id',
+        )
+            ->whereHas('faction');
     }
 }
