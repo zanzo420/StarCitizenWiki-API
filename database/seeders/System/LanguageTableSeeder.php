@@ -18,7 +18,7 @@ class LanguageTableSeeder extends Seeder
      */
     public function run(): void
     {
-        if (DB::table('languages')->where('locale_code', 'en_EN')->exists()) {
+        if (DB::table('languages')->where('locale_code', Language::ENGLISH)->exists()) {
             return;
         }
 
@@ -26,14 +26,21 @@ class LanguageTableSeeder extends Seeder
 
         DB::table('languages')->insert(
             [
-                'locale_code' => 'en_EN',
+                'locale_code' => Language::ENGLISH,
                 'created_at' => $now,
                 'updated_at' => $now,
             ]
         );
         DB::table('languages')->insert(
             [
-                'locale_code' => 'de_DE',
+                'locale_code' => Language::GERMAN,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]
+        );
+        DB::table('languages')->insert(
+            [
+                'locale_code' => Language::CHINESE,
                 'created_at' => $now,
                 'updated_at' => $now,
             ]
