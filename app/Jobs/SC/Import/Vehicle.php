@@ -51,7 +51,7 @@ class Vehicle implements ShouldQueue
 
     public function handle(): void
     {
-        $labels = (new Labels())->getData();
+        $labels = new Labels();
         $manufacturers = (new Manufacturers())->getData();
 
         $vehicle = $this->shipData;

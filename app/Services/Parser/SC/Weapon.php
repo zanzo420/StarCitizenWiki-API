@@ -152,7 +152,7 @@ final class Weapon extends AbstractCommodityItem
 
         $base = [
             'mode' => $mode['name'],
-            'localised' => $this->labels->get(substr($mode['localisedName'], 1)),
+            'localised' => $this->labels->getData()->get(substr($mode['localisedName'], 1)),
         ];
 
         switch (strtolower($mode['name'])) {

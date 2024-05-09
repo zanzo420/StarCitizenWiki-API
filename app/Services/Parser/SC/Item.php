@@ -29,11 +29,11 @@ final class Item extends AbstractCommodityItem
      * @throws FileNotFoundException
      * @throws JsonException
      */
-    public function __construct(string $fileName, Collection $labels, Collection $manufacturers)
+    public function __construct(string $fileName, Collection $manufacturers)
     {
+        parent::__construct($fileName, new Labels());
         $items = File::get($fileName);
         $this->item = collect(json_decode($items, true, 512, JSON_THROW_ON_ERROR));
-        $this->labels = $labels;
         $this->manufacturers = $manufacturers;
     }
 
@@ -135,6 +135,7 @@ final class Item extends AbstractCommodityItem
             'required_tags' => $attachDef['RequiredTags'] ?? null,
             'sub_type' => $attachDef['SubType'],
             'description' => $descriptionData['description'] ?? null,
+            'description_zh' => $this->getDescriptionText($this->getDescription($attachDef, 'zh')),
             'manufacturer_description' => $descriptionData['manufacturer'] ?? null,
             'manufacturer' => $manufacturer,
             'size' => $attachDef['Size'],

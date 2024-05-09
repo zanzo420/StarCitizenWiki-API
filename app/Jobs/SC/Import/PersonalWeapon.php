@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace App\Jobs\SC\Import;
 
 use App\Models\SC\Char\PersonalWeapon\PersonalWeapon as PersonalWeaponModel;
-use App\Services\Parser\SC\Labels;
 use App\Services\Parser\SC\Weapon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -17,29 +15,22 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 use JsonException;
 
-class PersonalWeapon implements ShouldQueue
+class PersonalWeapon extends AbstractItemCreationJob
 {
     use Dispatchable;
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
 
-    private string $filePath;
-
-    public function __construct(string $filePath)
-    {
-        $this->filePath = $filePath;
-    }
 
     /**
      * Execute the job.
      */
     public function handle(): void
     {
-        $labels = (new Labels())->getData();
-
+        $this->loadLabels();
         try {
-            $parser = new Weapon($this->filePath, $labels);
+            $parser = new Weapon($this->filePath, $this->labels);
         } catch (JsonException|FileNotFoundException $e) {
             $this->fail($e->getMessage());
 
