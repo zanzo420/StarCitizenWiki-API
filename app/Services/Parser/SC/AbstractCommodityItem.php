@@ -16,13 +16,13 @@ abstract class AbstractCommodityItem
 
     protected Collection $item;
 
-    protected Collection $labels;
+    protected Labels $labels;
 
     /**
      * @throws FileNotFoundException
      * @throws JsonException
      */
-    public function __construct(string $filePath, Collection $labels)
+    public function __construct(string $filePath, Labels $labels)
     {
         $this->filePath = $filePath;
         $item = File::get($filePath);
@@ -84,6 +84,19 @@ abstract class AbstractCommodityItem
             }
         }
 
+        return $out + [
+            'description' => $this->getDescriptionText($description),
+        ];
+    }
+
+    /**
+     * Tries to remove the leading part of a description containing data
+     *
+     * @param string $description
+     * @return string
+     */
+    protected function getDescriptionText(string $description): string
+    {
         $exploded = explode("\n\n", $description);
 
         if (count($exploded) === 1) {
@@ -91,21 +104,17 @@ abstract class AbstractCommodityItem
         }
 
         $exploded = array_filter($exploded, static function (string $part) {
-            return preg_match('/\w:[\s| ]/u', $part) !== 1;
+            return preg_match('/(：|\w:[\s| ])/u', $part) !== 1;
         });
 
-        $exploded = trim(implode("\n\n", $exploded));
-
-        return $out + [
-            'description' => $exploded,
-        ];
+        return trim(implode("\n\n", $exploded));
     }
 
     protected function getName(array $attachDef, string $default): string
     {
         $key = substr($attachDef['Localization']['Name'], 1);
-        $name = $this->labels->get($key);
-        $nameP = $this->labels->get($key.',P');
+        $name = $this->labels->getData()->get($key);
+        $nameP = $this->labels->getData()->get($key.',P');
         $name = $this->cleanString(trim($name ?? $nameP ?? $default));
 
         return empty($name) ? $default : $name;
@@ -116,9 +125,16 @@ abstract class AbstractCommodityItem
         return substr($attachDef['Localization']['Description'], 1);
     }
 
-    protected function getDescription(array $attachDef): string
+    protected function getDescription(array $attachDef, string $locale = 'en'): string
     {
-        return $this->cleanString($this->labels->get($this->getDescriptionKey($attachDef), ''));
+        switch ($locale) {
+            case 'zh':
+                return $this->cleanString($this->labels->getDataZh()->get($this->getDescriptionKey($attachDef), ''));
+
+            default:
+            case 'en':
+                return $this->cleanString($this->labels->getData()->get($this->getDescriptionKey($attachDef), ''));
+        }
     }
 
     protected function getManufacturer(array $attachDef, Collection $manufacturers): array

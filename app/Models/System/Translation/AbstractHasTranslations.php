@@ -30,7 +30,7 @@ abstract class AbstractHasTranslations extends Model
      */
     public function english(): ?Model
     {
-        return $this->translations->keyBy(self::LOCALE_CODE)->get('en_EN', null);
+        return $this->translations->keyBy(self::LOCALE_CODE)->get(Language::ENGLISH, null);
     }
 
     /**
@@ -38,7 +38,15 @@ abstract class AbstractHasTranslations extends Model
      */
     public function german(): ?Model
     {
-        return $this->translations->keyBy(self::LOCALE_CODE)->get('de_DE', null);
+        return $this->translations->keyBy(self::LOCALE_CODE)->get(Language::GERMAN, null);
+    }
+
+    /**
+     * @return Model|null
+     */
+    public function chinese(): ?Model
+    {
+        return $this->translations->keyBy(self::LOCALE_CODE)->get(Language::CHINESE, null);
     }
 
     public function localeCode(): BelongsTo

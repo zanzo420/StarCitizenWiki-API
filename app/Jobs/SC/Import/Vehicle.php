@@ -51,7 +51,6 @@ class Vehicle implements ShouldQueue
 
     public function handle(): void
     {
-        $labels = (new Labels())->getData();
         $manufacturers = (new Manufacturers())->getData();
 
         $vehicle = $this->shipData;
@@ -76,7 +75,6 @@ class Vehicle implements ShouldQueue
         if (! $vehicleModel->item === null || ! optional($vehicleModel->item)->exists) {
             $itemParser = new \App\Services\Parser\SC\Item(
                 $vehicle['filePath'],
-                $labels,
                 $manufacturers
             );
 

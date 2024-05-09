@@ -6,6 +6,7 @@ namespace App\Jobs\Wiki\CommLink;
 
 use App\Jobs\Wiki\ApproveRevisions;
 use App\Models\Rsi\CommLink\CommLink;
+use App\Models\System\Language;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Bus\Queueable;
@@ -27,14 +28,8 @@ class CreateCommLinkWikiPage implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    /**
-     * @var CommLink
-     */
     private CommLink $commLink;
 
-    /**
-     * @var string
-     */
     private string $template;
 
     /**
@@ -45,9 +40,7 @@ class CreateCommLinkWikiPage implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param CommLink $commLink
-     * @param string   $token
-     * @param string   $template The Template to include before every translation
+     * @param  string  $template  The Template to include before every translation
      */
     public function __construct(CommLink $commLink, string $token, string $template)
     {
@@ -58,24 +51,21 @@ class CreateCommLinkWikiPage implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
         $this->createCommLinkPage(config('services.wiki_translations.locale'), "Comm-Link:{$this->commLink->cig_id}");
 
         if (config('services.wiki_translations.create_english_subpage') === true) {
-            $this->createCommLinkPage('en_EN', "Comm-Link:{$this->commLink->cig_id}/en");
+            $this->createCommLinkPage(Language::ENGLISH, "Comm-Link:{$this->commLink->cig_id}/en");
         }
     }
 
     /**
      * Handle the actual creation
      *
-     * @param string $language Text language
-     * @param string $title MediaWiki Page Title
-     * @return void
+     * @param  string  $language  Text language
+     * @param  string  $title  MediaWiki Page Title
      */
     private function createCommLinkPage(string $language, string $title): void
     {
@@ -88,7 +78,7 @@ class CreateCommLinkWikiPage implements ShouldQueue
                 $text = optional($this->commLink->english())->translation;
             }
 
-            if ($text !== null && !Normalizer::isNormalized($text)) {
+            if ($text !== null && ! Normalizer::isNormalized($text)) {
                 $text = Normalizer::normalize($text);
             }
 
@@ -113,7 +103,7 @@ class CreateCommLinkWikiPage implements ShouldQueue
             $this->release(60);
 
             return;
-        } catch (GuzzleException | RuntimeException $e) {
+        } catch (GuzzleException|RuntimeException $e) {
             app('Log')::error('Could not get an CSRF Token', $e->getResponse()->getErrors());
 
             $this->fail($e);

@@ -6,38 +6,28 @@ namespace App\Jobs\SC\Import;
 
 use App\Models\SC\Char\PersonalWeapon\IronSight;
 use App\Models\SC\Char\PersonalWeapon\PersonalWeaponMagazine;
-use App\Services\Parser\SC\Labels;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use JsonException;
 
-class WeaponAttachment implements ShouldQueue
+class WeaponAttachment extends AbstractItemCreationJob
 {
     use Dispatchable;
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
 
-    private string $filePath;
-
-    public function __construct(string $filePath)
-    {
-        $this->filePath = $filePath;
-    }
-
     /**
      * Execute the job.
      */
     public function handle(): void
     {
-        $labels = (new Labels())->getData();
-
+        $this->loadLabels();
         try {
-            $parser = new \App\Services\Parser\SC\WeaponAttachment($this->filePath, $labels);
+            $parser = new \App\Services\Parser\SC\WeaponAttachment($this->filePath, $this->labels);
         } catch (FileNotFoundException|JsonException $e) {
             $this->fail($e);
 

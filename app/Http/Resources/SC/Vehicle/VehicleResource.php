@@ -8,6 +8,7 @@ use App\Http\Resources\AbstractBaseResource;
 use App\Http\Resources\SC\ItemSpecification\ArmorResource;
 use App\Http\Resources\SC\Shop\ShopResource;
 use App\Http\Resources\TranslationResourceFactory;
+use App\Models\System\Language;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use OpenApi\Attributes as OA;
@@ -353,10 +354,10 @@ class VehicleResource extends AbstractBaseResource
                 'armor' => new ArmorResource($this->armor),
             ]),
             'foci' => [
-                ['en_EN' => $this->career],
+                [Language::ENGLISH => $this->career],
             ],
             'type' => [
-                'en_EN' => $this->role,
+                Language::ENGLISH => $this->role,
             ],
             'description' => TranslationResourceFactory::getTranslationResource($request, $this),
             'size_class' => $this->size,

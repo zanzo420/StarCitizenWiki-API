@@ -9,6 +9,7 @@ use App\Models\StarCitizen\Galactapedia\Article;
 use App\Models\StarCitizen\Galactapedia\Category;
 use App\Models\StarCitizen\Galactapedia\Tag;
 use App\Models\StarCitizen\Galactapedia\Template;
+use App\Models\System\Language;
 use App\Traits\CreateRelationChangelogTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,19 +20,18 @@ use Illuminate\Support\Str;
 
 class ImportArticle extends AbstractBaseDownloadData implements ShouldQueue
 {
+    use CreateRelationChangelogTrait;
     use Dispatchable;
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
-    use CreateRelationChangelogTrait;
 
     private string $articleId;
+
     private Article $article;
 
     /**
      * Create a new job instance.
-     *
-     * @param string $articleId
      */
     public function __construct(string $articleId)
     {
@@ -42,15 +42,13 @@ class ImportArticle extends AbstractBaseDownloadData implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
         $result = $this->makeClient()->post('galactapedia/graphql', [
-            'query' => <<<QUERY
-query ArticleByID(\$query: ID!) {
-  Article(id: \$query) {
+            'query' => <<<'QUERY'
+query ArticleByID($query: ID!) {
+  Article(id: $query) {
     id
     title
     slug
@@ -90,7 +88,7 @@ QUERY,
 
         $result = $result->json() ?? [];
 
-        if (!isset($result['data']['Article'])) {
+        if (! isset($result['data']['Article'])) {
             return;
         }
 
@@ -111,7 +109,7 @@ QUERY,
 
         $this->article->translations()->updateOrCreate(
             [
-                'locale_code' => 'en_EN',
+                'locale_code' => Language::ENGLISH,
             ],
             [
                 'translation' => Article::normalizeContent($data['body']),
@@ -130,7 +128,6 @@ QUERY,
     /**
      * Syncs all article templates
      *
-     * @param array $data
      *
      * @return array Changed templates
      */
@@ -159,7 +156,6 @@ QUERY,
     /**
      * Syncs all article categories
      *
-     * @param array $data
      *
      * @return array Changed categories
      */
@@ -191,7 +187,6 @@ QUERY,
     /**
      * Syncs all article tags
      *
-     * @param array $data
      *
      * @return array Changed tags
      */
@@ -223,7 +218,6 @@ QUERY,
     /**
      * Syncs all related articles
      *
-     * @param array $data
      *
      * @return array changed data
      */
@@ -250,8 +244,6 @@ QUERY,
     /**
      * Checks if an article with a given title exists under multiple ids
      * if so, the older article will be disabled
-     *
-     * @param array $data
      */
     private function disableDuplicates(array $data): void
     {

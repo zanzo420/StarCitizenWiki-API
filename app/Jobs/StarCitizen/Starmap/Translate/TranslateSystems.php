@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs\StarCitizen\Starmap\Translate;
 
 use App\Models\StarCitizen\Starmap\Starsystem\Starsystem;
+use App\Models\System\Language;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Builder;
@@ -32,8 +33,6 @@ class TranslateSystems implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
@@ -42,7 +41,7 @@ class TranslateSystems implements ShouldQueue
         Starsystem::query()->whereHas(
             'translations',
             function (Builder $query) {
-                $query->where('locale_code', 'en_EN')->whereRaw("translation <> ''");
+                $query->where('locale_code', Language::ENGLISH)->whereRaw("translation <> ''");
             }
         )
             ->chunk(
@@ -50,7 +49,7 @@ class TranslateSystems implements ShouldQueue
                 function (Collection $systems) {
                     $systems->each(
                         function (Starsystem $starsystem) {
-                            if (null !== optional($starsystem->german())->translation) {
+                            if (optional($starsystem->german())->translation !== null) {
                                 return;
                             }
 
@@ -78,7 +77,7 @@ class TranslateSystems implements ShouldQueue
                                 app('Log')::warning($e->getMessage());
 
                                 return;
-                            } catch (CallException | AuthenticationException | InvalidArgumentException $e) {
+                            } catch (CallException|AuthenticationException|InvalidArgumentException $e) {
                                 app('Log')::warning(
                                     sprintf('%s: %s', 'Translation failed with Message', $e->getMessage())
                                 );

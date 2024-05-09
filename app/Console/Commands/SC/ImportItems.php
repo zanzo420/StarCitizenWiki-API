@@ -46,7 +46,6 @@ class ImportItems extends AbstractQueueCommand
      */
     public function handle(): int
     {
-        $labels = (new Labels())->getData();
         $manufacturers = (new Manufacturers())->getData();
 
         $files = File::allFiles(scdata('items')) + Storage::allFiles(scdata('ships'));
@@ -67,13 +66,13 @@ class ImportItems extends AbstractQueueCommand
                 ->tap(function (Collection $chunks) {
                     $this->createProgressBar($chunks->count());
                 })
-                ->each(function (Collection $chunk) use ($labels, $manufacturers) {
+                ->each(function (Collection $chunk) use ($manufacturers) {
                     $this->bar->advance();
 
-                    $chunk->map(function (string $file) use ($labels, $manufacturers) {
+                    $chunk->map(function (string $file) use ($manufacturers) {
                         return [
                             'file' => $file,
-                            'item' => (new Item($file, $labels, $manufacturers))->getData(),
+                            'item' => (new Item($file, $manufacturers))->getData(),
                         ];
                     })
                         ->filter(function (array $data) {

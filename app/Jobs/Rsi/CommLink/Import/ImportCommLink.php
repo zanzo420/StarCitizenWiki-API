@@ -7,6 +7,7 @@ namespace App\Jobs\Rsi\CommLink\Import;
 use App\Jobs\Rsi\CommLink\Download\DownloadCommLink;
 use App\Models\Rsi\CommLink\CommLink;
 use App\Models\Rsi\CommLink\CommLinksChanged;
+use App\Models\System\Language;
 use App\Services\Parser\CommLink\Content;
 use App\Services\Parser\CommLink\Image;
 use App\Services\Parser\CommLink\Link;
@@ -55,30 +56,22 @@ class ImportCommLink implements ShouldQueue
      */
     private string $file;
 
-    /**
-     * @var CommLink|null
-     */
     private ?CommLink $commLinkModel;
 
     /**
      * True if the given file content should be imported into the comm link model.
-     *
-     * @var bool
      */
     private bool $forceImport;
 
-    /**
-     * @var Crawler
-     */
     private Crawler $crawler;
 
     /**
      * Create a new job instance.
      *
-     * @param int           $id          Comm-Link ID
-     * @param string        $file        Current File Name
-     * @param CommLink|null $commLink    Optional Comm-Link Model to update
-     * @param bool          $forceImport Flag to Force Import from current file
+     * @param  int  $id  Comm-Link ID
+     * @param  string  $file  Current File Name
+     * @param  CommLink|null  $commLink  Optional Comm-Link Model to update
+     * @param  bool  $forceImport  Flag to Force Import from current file
      */
     public function __construct(int $id, string $file, ?CommLink $commLink = null, bool $forceImport = false)
     {
@@ -91,7 +84,6 @@ class ImportCommLink implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
      *
      * @throws FileNotFoundException
      */
@@ -102,8 +94,8 @@ class ImportCommLink implements ShouldQueue
             [
                 'id' => $this->commLinkId,
                 'file' => $this->file,
-                'comm_link_already_in_db' => null !== $this->commLinkModel,
-                'force_import' => true === $this->forceImport,
+                'comm_link_already_in_db' => $this->commLinkModel !== null,
+                'force_import' => $this->forceImport === true,
             ]
         );
 
@@ -119,13 +111,13 @@ class ImportCommLink implements ShouldQueue
         $subscribers = $this->crawler->filter(self::SUBSCRIBERS_SELECTOR);
         $specialPage = $this->crawler->filter(self::SPECIAL_PAGE_SELECTOR);
 
-        if (0 === $post->count() && 0 === $subscribers->count() && 0 === $specialPage->count()) {
+        if ($post->count() === 0 && $subscribers->count() === 0 && $specialPage->count() === 0) {
             app('Log')::info("Comm-Link with id {$this->commLinkId} has no content");
 
             return;
         }
 
-        if (null === $this->commLinkModel || $this->forceImport) {
+        if ($this->commLinkModel === null || $this->forceImport) {
             $this->createCommLink(); // Updates or Creates
         } else {
             $this->checkCommLinkForChanges();
@@ -172,8 +164,6 @@ class ImportCommLink implements ShouldQueue
 
     /**
      * Creates the Comm-Link Dara Array from Metadata.
-     *
-     * @return array
      */
     private function getCommLinkData(): array
     {
@@ -201,15 +191,13 @@ class ImportCommLink implements ShouldQueue
 
     /**
      * Adds or Updates the default english Translation to the Comm-Link.
-     *
-     * @param CommLink $commLink
      */
     private function addEnglishCommLinkTranslation(CommLink $commLink): void
     {
         $contentParser = new Content($this->crawler);
         $commLink->translations()->updateOrCreate(
             [
-                'locale_code' => 'en_EN',
+                'locale_code' => Language::ENGLISH,
             ],
             [
                 'translation' => $contentParser->getContent(),
@@ -220,8 +208,6 @@ class ImportCommLink implements ShouldQueue
 
     /**
      * Syncs extracted Comm-Link Image Ids.
-     *
-     * @param CommLink $commLink
      */
     private function syncImageIds(CommLink $commLink): void
     {
@@ -230,9 +216,7 @@ class ImportCommLink implements ShouldQueue
     }
 
     /**
-     * Syncs extrated Comm-Link Link Ids.
-     *
-     * @param CommLink $commLink
+     * Syncs extracted Comm-Link Link Ids.
      */
     private function syncLinkIds(CommLink $commLink): void
     {
@@ -250,7 +234,7 @@ class ImportCommLink implements ShouldQueue
 
         if ($this->contentHasChanged()) {
             $hadContent = true;
-            if (null === optional($this->commLinkModel->english())->translation) {
+            if (optional($this->commLinkModel->english())->translation === null) {
                 $hadContent = false;
             } else {
                 // Don't update the current File if Content has Changed and Translation is not null
@@ -284,8 +268,6 @@ class ImportCommLink implements ShouldQueue
 
     /**
      * Checks if Local Content is Equal to DB Content.
-     *
-     * @return bool
      */
     private function contentHasChanged(): bool
     {
@@ -296,8 +278,6 @@ class ImportCommLink implements ShouldQueue
 
     /**
      * Returns the first file in a comm-link folder or null
-     *
-     * @return string|null
      */
     private function getFirstCommLinkFileName(): ?string
     {
@@ -308,10 +288,6 @@ class ImportCommLink implements ShouldQueue
 
     /**
      * Creates a timestamp from a comm-link filename
-     *
-     * @param string $file
-     *
-     * @return string|null
      */
     private function createTimestampFromFile(string $file): ?string
     {

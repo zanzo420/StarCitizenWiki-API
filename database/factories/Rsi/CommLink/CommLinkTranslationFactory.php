@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories\Rsi\CommLink;
 
 use App\Models\Rsi\CommLink\CommLinkTranslation;
+use App\Models\System\Language;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CommLinkTranslationFactory extends Factory
@@ -24,7 +25,7 @@ class CommLinkTranslationFactory extends Factory
     public function definition()
     {
         return [
-            'locale_code' => 'en_EN',
+            'locale_code' => Language::ENGLISH,
             'translation' => $this->faker->randomHtml(2, 3),
         ];
     }
@@ -34,7 +35,7 @@ class CommLinkTranslationFactory extends Factory
         return $this->state(
             function (array $attributes) {
                 return [
-                    'locale_code' => 'de_DE',
+                    'locale_code' => Language::GERMAN,
                     'translation' => $this->faker->randomHtml(2, 3),
                 ];
             }

@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\ApiRouteCalled;
 use App\Http\Controllers\Controller;
+use App\Models\System\Language;
 use App\Transformers\Api\LocalizableTransformerInterface;
 use App\Transformers\Api\V1\AbstractV1Transformer as V1Transformer;
 use Carbon\Carbon;
@@ -62,8 +63,9 @@ use OpenApi\Attributes as OA;
         description: 'Localization to use.',
         collectionFormat: 'csv',
         enum: [
-            'de_DE',
-            'en_EN',
+            Language::ENGLISH,
+            Language::GERMAN,
+            Language::CHINESE,
         ]
     ),
 )]
@@ -131,7 +133,7 @@ abstract class AbstractApiController extends Controller
     /**
      * AbstractApiController constructor.
      *
-     * @param Request $request API Request
+     * @param  Request  $request  API Request
      */
     public function __construct(Request $request)
     {
@@ -158,12 +160,12 @@ abstract class AbstractApiController extends Controller
      */
     private function processLimit(): void
     {
-        if ($this->request->has(self::LIMIT) && null !== $this->request->get(self::LIMIT, null)) {
-            $itemLimit = (int)$this->request->get(self::LIMIT);
+        if ($this->request->has(self::LIMIT) && $this->request->get(self::LIMIT, null) !== null) {
+            $itemLimit = (int) $this->request->get(self::LIMIT);
 
             if ($itemLimit > 0) {
                 $this->limit = $itemLimit;
-            } elseif (0 === $itemLimit) {
+            } elseif ($itemLimit === 0) {
                 $this->limit = 0;
             } else {
                 $this->errors[self::LIMIT] = static::INVALID_LIMIT_STRING;
@@ -176,15 +178,13 @@ abstract class AbstractApiController extends Controller
      */
     private function processLocale(): void
     {
-        if ($this->request->has(self::LOCALE) && null !== $this->request->get(self::LOCALE, null)) {
+        if ($this->request->has(self::LOCALE) && $this->request->get(self::LOCALE, null) !== null) {
             $this->setLocale($this->request->get(self::LOCALE));
         }
     }
 
     /**
      * Set the Locale
-     *
-     * @param string $localeCode
      */
     protected function setLocale(string $localeCode): void
     {
@@ -215,9 +215,7 @@ abstract class AbstractApiController extends Controller
      * Creates the API Response, Collection if no pagination, Paginator if a limit is set
      * Item if a single model is given
      *
-     * @param Builder|Model|Collection $query
-     *
-     * @return Response
+     * @param  Builder|Model|Collection  $query
      */
     protected function getResponse($query): Response
     {
@@ -253,7 +251,6 @@ abstract class AbstractApiController extends Controller
             'forwarded-for' => $this->request->header('X-Forwarded-For', '127.0.0.1'),
         ]);
 
-
         $resource = new \League\Fractal\Resource\Collection(
             $query->get(),
             $this->transformer
@@ -275,11 +272,11 @@ abstract class AbstractApiController extends Controller
             'processed_at' => Carbon::now()->toDateTimeString(),
         ];
 
-        if (!empty($this->errors)) {
+        if (! empty($this->errors)) {
             $meta['errors'] = $this->errors;
         }
 
-        if (!empty($this->transformer->getAvailableIncludes())) {
+        if (! empty($this->transformer->getAvailableIncludes())) {
             $meta['valid_relations'] = array_map(
                 'Illuminate\Support\Str::snake',
                 $this->transformer->getAvailableIncludes()
@@ -294,7 +291,7 @@ abstract class AbstractApiController extends Controller
      */
     private function processIncludes(): void
     {
-        if ($this->request->has('include') && null !== $this->request->get('include', null)) {
+        if ($this->request->has('include') && $this->request->get('include', null) !== null) {
             $this->checkIncludes($this->request->get('include', []));
         }
     }
@@ -302,11 +299,11 @@ abstract class AbstractApiController extends Controller
     /**
      * Processes the given 'include' model relation key
      *
-     * @param string|array $relations
+     * @param  string|array  $relations
      */
     protected function checkIncludes($relations): void
     {
-        if (!is_array($relations)) {
+        if (! is_array($relations)) {
             $relations = explode(',', $relations);
         }
 
@@ -322,7 +319,7 @@ abstract class AbstractApiController extends Controller
             )
             ->each(
                 function ($relation) {
-                    if (!in_array($relation, $this->transformer->getAvailableIncludes(), true)) {
+                    if (! in_array($relation, $this->transformer->getAvailableIncludes(), true)) {
                         $this->errors['include'][] = sprintf(static::INVALID_RELATION_STRING, Str::snake($relation));
                     }
                 }
@@ -331,9 +328,6 @@ abstract class AbstractApiController extends Controller
 
     /**
      * Cleans the name for query use
-     *
-     * @param string $name
-     * @return string
      */
     protected function cleanQueryName(string $name): string
     {
