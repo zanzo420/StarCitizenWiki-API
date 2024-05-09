@@ -7,6 +7,7 @@ namespace App\Console\Commands\StarCitizen\Galactapedia;
 use App\Console\Commands\AbstractQueueCommand;
 use App\Jobs\StarCitizen\Galactapedia\TranslateArticle;
 use App\Models\StarCitizen\Galactapedia\Article;
+use App\Models\System\Language;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -39,7 +40,7 @@ class TranslateArticles extends AbstractQueueCommand
                 'translations',
                 function (Builder $query) {
                     $query
-                        ->where('locale_code', 'en_EN')
+                        ->where('locale_code', Language::ENGLISH)
                         ->whereRaw("translation <> ''");
                 }
             )

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs\StarCitizen\Starmap\Import;
 
 use App\Models\StarCitizen\Starmap\CelestialObject\CelestialObject as CelestialObjectModel;
+use App\Models\System\Language;
 use App\Services\Parser\Starmap\Affiliation;
 use App\Services\Parser\Starmap\CelestialSubtype;
 use Illuminate\Bus\Queueable;
@@ -24,11 +25,6 @@ class ImportCelestialObject implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    protected const LANGUAGE_EN = 'en_EN';
-
-    /**
-     * @var Collection
-     */
     protected Collection $rawData;
 
     /**
@@ -39,8 +35,7 @@ class ImportCelestialObject implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param array|Collection $rawData
-     * @param int              $starsystemId
+     * @param  array|Collection  $rawData
      */
     public function __construct($rawData, int $starsystemId)
     {
@@ -50,8 +45,6 @@ class ImportCelestialObject implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
@@ -75,7 +68,7 @@ class ImportCelestialObject implements ShouldQueue
             $celestialObject->translations()->updateOrCreate(
                 [
                     'celestial_object_id' => $celestialObject->id,
-                    'locale_code' => self::LANGUAGE_EN,
+                    'locale_code' => Language::ENGLISH,
                 ],
                 [
                     'translation' => $description,

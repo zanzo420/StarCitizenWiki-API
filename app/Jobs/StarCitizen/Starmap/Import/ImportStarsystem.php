@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs\StarCitizen\Starmap\Import;
 
 use App\Models\StarCitizen\Starmap\Starsystem\Starsystem;
+use App\Models\System\Language;
 use App\Services\Parser\Starmap\Affiliation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -23,17 +24,12 @@ class ImportStarsystem implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    protected const LANGUAGE_EN = 'en_EN';
-
-    /**
-     * @var Collection
-     */
     protected Collection $rawData;
 
     /**
      * Create a new job instance.
      *
-     * @param array|Collection $rawData
+     * @param  array|Collection  $rawData
      */
     public function __construct($rawData)
     {
@@ -42,8 +38,6 @@ class ImportStarsystem implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
@@ -62,7 +56,7 @@ class ImportStarsystem implements ShouldQueue
         $starsystem->translations()->updateOrCreate(
             [
                 'starsystem_id' => $starsystem->id,
-                'locale_code' => self::LANGUAGE_EN,
+                'locale_code' => Language::ENGLISH,
             ],
             [
                 'translation' => $description,

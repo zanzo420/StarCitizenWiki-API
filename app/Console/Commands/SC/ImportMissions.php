@@ -8,7 +8,7 @@ use App\Models\SC\Mission\Type;
 use App\Models\SC\Reputation\Reward;
 use App\Models\SC\Reputation\Scope;
 use App\Models\SC\Reputation\Standing;
-use Exception;
+use App\Models\System\Language;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
@@ -168,7 +168,7 @@ class ImportMissions extends Command
 
             if (! empty($data['description'])) {
                 $giver->translations()->updateOrCreate([
-                    'locale_code' => 'en_EN',
+                    'locale_code' => Language::ENGLISH,
                 ], [
                     'translation' => $data['description'],
                 ]);
@@ -240,7 +240,7 @@ class ImportMissions extends Command
 
             if (! str_starts_with($data['description'], '@')) {
                 $mission->translations()->updateOrCreate([
-                    'locale_code' => 'en_EN',
+                    'locale_code' => Language::ENGLISH,
                 ], [
                     'translation' => $data['description'],
                 ]);

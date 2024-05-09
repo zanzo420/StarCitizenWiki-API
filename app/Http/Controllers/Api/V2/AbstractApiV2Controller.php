@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V2;
 
 use App\Events\ApiRouteCalled;
 use App\Http\Controllers\Controller;
+use App\Models\System\Language;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 use Spatie\QueryBuilder\AllowedInclude;
@@ -48,8 +49,9 @@ use Spatie\QueryBuilder\AllowedInclude;
     schema: new OA\Schema(
         description: 'Localization to use.',
         enum: [
-            'de_DE',
-            'en_EN',
+            Language::ENGLISH,
+            Language::GERMAN,
+            Language::CHINESE,
         ]
     ),
 )]

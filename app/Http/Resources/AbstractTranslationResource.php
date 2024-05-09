@@ -19,8 +19,9 @@ use OpenApi\Attributes as OA;
     title: 'Grouped Translations',
     description: 'Translations of an entity',
     properties: [
-        new OA\Property(property: 'en_EN', type: 'string'),
-        new OA\Property(property: 'de_DE', type: 'string'),
+        new OA\Property(property: Language::ENGLISH, type: 'string'),
+        new OA\Property(property: Language::GERMAN, type: 'string'),
+        new OA\Property(property: Language::CHINESE, type: 'string'),
     ],
     type: 'object'
 )]
@@ -38,6 +39,7 @@ abstract class AbstractTranslationResource extends AbstractBaseResource
         $translations = $model->translationsCollection();
 
         $locale = $request->get('locale');
+
         if (! empty($locale)) {
             return $this->getSingleTranslation($translations, $request->get('locale'), $translationKey);
         }
@@ -45,7 +47,7 @@ abstract class AbstractTranslationResource extends AbstractBaseResource
         $translations = $translations->map(
             function ($translation) use ($translationKey, $translations) {
                 if ($translation instanceof Language) {
-                    return $this->getSingleTranslation($translations, 'en_EN', $translationKey);
+                    return $this->getSingleTranslation($translations, Language::ENGLISH, $translationKey);
                 }
 
                 return $this->getSingleTranslation($translation, $translationKey);
@@ -75,8 +77,8 @@ abstract class AbstractTranslationResource extends AbstractBaseResource
 
         if ($translations->has($locale) && ! $translations->get($locale) instanceof Language) {
             $translation = $translations->get($locale)[$translationKey];
-        } elseif ($translations->has('en_EN')) {
-            $translation = $translations->get('en_EN')[$translationKey];
+        } elseif ($translations->has(Language::ENGLISH)) {
+            $translation = $translations->get(Language::ENGLISH)[$translationKey];
         }
 
         return $translation;

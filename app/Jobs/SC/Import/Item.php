@@ -12,6 +12,7 @@ use App\Models\SC\Item\ItemSubType;
 use App\Models\SC\Item\ItemType;
 use App\Models\SC\Item\Tag;
 use App\Models\SC\Manufacturer;
+use App\Models\System\Language;
 use App\Services\ManufacturerFixer;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -68,7 +69,7 @@ class Item implements ShouldQueue
 
         if (! empty($this->data['description'])) {
             $itemModel->translations()->updateOrCreate([
-                'locale_code' => 'en_EN',
+                'locale_code' => Language::ENGLISH,
             ], [
                 'translation' => $this->data['description'],
             ]);

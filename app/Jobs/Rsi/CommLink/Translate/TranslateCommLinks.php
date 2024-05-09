@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs\Rsi\CommLink\Translate;
 
 use App\Models\Rsi\CommLink\CommLink;
+use App\Models\System\Language;
 use App\Traits\Jobs\GetCommLinkWikiPageInfoTrait as GetCommLinkWikiPageInfo;
 use App\Traits\LoginWikiBotAccountTrait as LoginWikiBotAccount;
 use Illuminate\Bus\Queueable;
@@ -57,7 +58,7 @@ class TranslateCommLinks implements ShouldQueue
         CommLink::query()->whereHas(
             'translations',
             function (Builder $query) {
-                $query->where('locale_code', 'en_EN')->whereRaw("translation <> ''");
+                $query->where('locale_code', Language::ENGLISH)->whereRaw("translation <> ''");
             }
         )
             ->whereIn('cig_id', $this->commLinkIds)
@@ -69,7 +70,7 @@ class TranslateCommLinks implements ShouldQueue
                     } catch (RuntimeException $e) {
                         app('Log')::error($e->getMessage());
 
-                        if (strpos($e->getMessage(), 'Guru Meditation') !== false) {
+                        if (str_contains($e->getMessage(), 'Guru Meditation')) {
                             $this->release(60);
                         } else {
                             $this->fail($e);
