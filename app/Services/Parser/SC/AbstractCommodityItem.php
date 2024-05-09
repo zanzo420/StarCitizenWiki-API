@@ -97,6 +97,10 @@ abstract class AbstractCommodityItem
      */
     protected function getDescriptionText(string $description): string
     {
+        $description = str_replace('\\n \\n', '\\n\\n', $description);
+
+        $description = trim(str_replace('\n', "\n", $description));
+        $description = str_replace(['‘', '’', '`', '´', ' '], ['\'', '\'', '\'', '\'', ' '], $description);
         $exploded = explode("\n\n", $description);
 
         if (count($exploded) === 1) {
