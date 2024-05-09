@@ -17,7 +17,7 @@ class Language extends Model
 
     public const ENGLISH = 'en_EN';
     public const GERMAN = 'de_DE';
-    public const CHINESE = 'zh_HANS';
+    public const CHINESE = 'zh_CN';
 
 
     public $incrementing = false;

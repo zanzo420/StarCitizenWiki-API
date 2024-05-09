@@ -11,7 +11,7 @@ return [
     'codes' => [
         'de_DE',
         'en_EN',
-        'zh_HANS',
+        'zh_CN',
     ],
 
     'enable_galactapedia_language_links' => env('GALACTAPEDIA_LANGUAGE_LINKS', false),

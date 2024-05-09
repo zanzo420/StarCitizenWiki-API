@@ -75,6 +75,14 @@ class Item implements ShouldQueue
             ]);
         }
 
+        if (! empty($this->data['description_zh'])) {
+            $itemModel->translations()->updateOrCreate([
+                'locale_code' => Language::CHINESE,
+            ], [
+                'translation' => $this->data['description_zh'],
+            ]);
+        }
+
         $data = collect($this->data['description_data'] ?? [])->filter(function ($value, $key) {
             return $key !== 'description';
         })->each(function ($value, $key) use ($itemModel) {
