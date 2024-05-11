@@ -17,13 +17,13 @@ class GroundVehicle extends Vehicle
     /**
      * Adds the global Ground Vehicle Scope
      */
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
         static::addGlobalScope(
             'size',
-            function (Builder $builder) {
+            static function (Builder $builder) {
                 $builder->has('groundVehicles');
             }
         );

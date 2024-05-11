@@ -105,25 +105,16 @@ class Vehicle extends HasTranslations implements HasChangelogsInterface
         'deleting' => ModelUpdating::class,
     ];
 
-    /**
-     * @return HasMany
-     */
-    public function translations()
+    public function translations(): HasMany
     {
         return $this->hasMany(VehicleTranslation::class);
     }
 
-    /**
-     * @return HasMany
-     */
-    public function skus()
+    public function skus(): HasMany
     {
         return $this->hasMany(VehicleSku::class);
     }
 
-    /**
-     * @return HasManyThrough
-     */
     public function translationChangelogs(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -134,59 +125,31 @@ class Vehicle extends HasTranslations implements HasChangelogsInterface
         )->where('changelog_type', VehicleTranslation::class);
     }
 
-    /**
-     * The Vehicle Foci
-     *
-     * @return BelongsToMany
-     */
-    public function foci()
+    public function foci(): BelongsToMany
     {
         return $this->belongsToMany(Focus::class, 'vehicle_vehicle_focus');
     }
 
-    /**
-     * The Vehicle Manufacturer
-     *
-     * @return BelongsTo
-     */
     public function manufacturer(): BelongsTo
     {
         return $this->belongsTo(Manufacturer::class);
     }
 
-    /**
-     * The Vehicle Production Status
-     *
-     * @return BelongsTo
-     */
     public function productionStatus(): BelongsTo
     {
         return $this->belongsTo(ProductionStatus::class, 'production_status_id');
     }
 
-    /**
-     * The Vehicle Production Note
-     *
-     * @return BelongsTo
-     */
     public function productionNote(): BelongsTo
     {
         return $this->belongsTo(ProductionNote::class, 'production_note_id');
     }
 
-    /**
-     * The Vehicle Role Type
-     *
-     * @return BelongsTo
-     */
     public function type(): BelongsTo
     {
         return $this->belongsTo(Type::class);
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function components(): BelongsToMany
     {
         return $this->belongsToMany(Component::class, 'vehicle_component')
@@ -201,11 +164,6 @@ class Vehicle extends HasTranslations implements HasChangelogsInterface
             );
     }
 
-    /**
-     * Get Components keyed by component class
-     *
-     * @return array
-     */
     public function componentsByClass(): array
     {
         $components = $this->components
@@ -227,21 +185,11 @@ class Vehicle extends HasTranslations implements HasChangelogsInterface
         return $components;
     }
 
-    /**
-     * Ships
-     *
-     * @return mixed
-     */
     public function ships()
     {
         return $this->size()->ship();
     }
 
-    /**
-     * The Vehicle Size
-     *
-     * @return BelongsTo
-     */
     public function size(): BelongsTo
     {
         return $this->belongsTo(Size::class);
@@ -309,8 +257,6 @@ class Vehicle extends HasTranslations implements HasChangelogsInterface
 
     /**
      * Unpacked Data
-     *
-     * @return HasOne
      */
     public function unpacked(): HasOne
     {
@@ -324,8 +270,6 @@ class Vehicle extends HasTranslations implements HasChangelogsInterface
 
     /**
      * Unpacked Data
-     *
-     * @return HasOne
      */
     public function sc(): HasOne
     {
@@ -337,41 +281,22 @@ class Vehicle extends HasTranslations implements HasChangelogsInterface
             ->withDefault();
     }
 
-
-    /**
-     * Ground Vehicles
-     *
-     * @return mixed
-     */
     public function groundVehicles()
     {
         return $this->size()->groundVehicle();
     }
 
-    /**
-     * Use Vehicle Class in Children
-     *
-     * @return string
-     */
-    public function getMorphClass()
+    public function getMorphClass(): string
     {
         return self::class;
     }
 
-    /**
-     * Hardcoded to fix Child Problems
-     *
-     * @return string
-     */
-    public function getForeignKey()
+    public function getForeignKey(): string
     {
         return 'vehicle_id';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getRouteKeyName()
+    public function getRouteKeyName(): string
     {
         return 'slug';
     }

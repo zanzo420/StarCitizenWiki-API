@@ -1,3 +1,4 @@
+@php use App\Models\StarCitizen\Vehicle\Focus\Focus; @endphp
 @extends('web.layouts.default_wide')
 
 @section('title')
@@ -185,7 +186,7 @@
                             ])
                                 @slot('value')
                                     {{
-                                        $ship->foci->transform(function(\App\Models\StarCitizen\Vehicle\Focus\Focus $focus) {
+                                        $ship->foci->transform(function(Focus $focus) {
                                             return optional($focus->german())->translation ?? optional($focus->english())->translation ?? __('Keiner');
                                         })->implode(', ')
                                     }}
