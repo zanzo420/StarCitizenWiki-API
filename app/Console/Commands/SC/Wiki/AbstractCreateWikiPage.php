@@ -11,6 +11,7 @@ use ErrorException;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use RuntimeException;
 use StarCitizenWiki\MediaWikiApi\Facades\MediaWikiApi;
 
 abstract class AbstractCreateWikiPage extends AbstractQueueCommand
@@ -47,7 +48,7 @@ ITEM;
             return;
         }
 
-//        $this->createEnglishSubpage($this->getPageName($model), $token);
+        //        $this->createEnglishSubpage($this->getPageName($model), $token);
 
         if ($response->hasErrors() && $response->getErrors()['code'] !== 'articleexists') {
             $this->error(implode(', ', $response->getErrors()));
@@ -76,10 +77,24 @@ ITEM;
 
         $originalTemplate = $this->template;
 
+        if (config('services.wiki_pages.refname') === null || config('services.wiki_pages.version') === null) {
+            throw new RuntimeException('Missing config');
+        }
+
+        $this->template = str_replace(
+            '<REFNAME>',
+            config('services.wiki_pages.refname'),
+            $this->template
+        );
+        $this->template = str_replace(
+            '<REFVERSION>',
+            config('services.wiki_pages.version'),
+            $this->template
+        );
+
         $this->template = str_replace(
             '<CURDATE>',
-            '2024-04-01',
-            //Carbon::now()->format('Y-m-d'),
+            Carbon::now()->format('Y-m-d'),
             $this->template
         );
         $this->template = str_replace(

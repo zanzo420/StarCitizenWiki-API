@@ -67,5 +67,10 @@ return [
     'plausible' => [
         'enabled' => env('PLAUSIBLE_ENABLED', false),
         'domain' => env('PLAUSIBLE_DOMAIN'),
-    ]
+    ],
+
+    'wiki_pages' => [
+        'refname' => env('WIKI_PAGE_REFNAME'),
+        'version' => env('WIKI_PAGE_VERSION'),
+    ],
 ];

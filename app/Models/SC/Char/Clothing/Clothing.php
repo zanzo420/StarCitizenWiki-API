@@ -10,6 +10,23 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Clothing extends Item
 {
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::addGlobalScope(
+            'remove_unusable',
+            static function (Builder $builder) {
+                $builder
+                    ->where('sc_items.name', 'NOT LIKE', '%PLACEHOLDER%')
+                    ->where('sc_items.name', 'NOT LIKE', '%Placeholder%')
+                    ->where('sc_items.name', 'NOT LIKE', 'PH -%')
+                    ->where('sc_items.name', 'NOT LIKE', '[PH]%')
+                    ->where('sc_items.name', 'NOT LIKE', '%- name%');
+            }
+        );
+    }
+
     public function __construct(array $attributes = [])
     {
         $this->with = collect($this->with)->merge([

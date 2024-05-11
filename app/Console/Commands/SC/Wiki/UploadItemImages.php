@@ -116,25 +116,25 @@ class UploadItemImages extends AbstractQueueCommand
         $this->http = Http::baseUrl(config('services.item_thumbnail_url'));
         $this->upload = new UploadWikiImage(true);
 
-//        $this->info('Uploading Char Armor Images...');
-//        $this->withProgressBar(Armor::all(), function (Armor $armor) {
-//            $this->work($armor, true);
-//        });
-//
-//        $this->info('Uploading Clothing Images...');
-//        $this->withProgressBar(Clothes::all(), function (Clothes $armor) {
-//            $this->work($armor, true);
-//        });
-//
-//        $this->info('Uploading Weapon Personal Images...');
-//        $this->withProgressBar(PersonalWeapon::all(), function (PersonalWeapon $armor) {
-//            $this->work($armor, true);
-//        });
-//
-//        $this->info('Uploading Weapon Attachment Images...');
-//        $this->withProgressBar(Attachment::all(), function (Attachment $armor) {
-//            $this->work($armor, true);
-//        });
+        $this->info('Uploading Char Armor Images...');
+        $this->withProgressBar(Armor::all(), function (Armor $armor) {
+            $this->work($armor, true);
+        });
+
+        $this->info('Uploading Clothing Images...');
+        $this->withProgressBar(Clothes::all(), function (Clothes $armor) {
+            $this->work($armor, true);
+        });
+
+        $this->info('Uploading Weapon Personal Images...');
+        $this->withProgressBar(PersonalWeapon::all(), function (PersonalWeapon $armor) {
+            $this->work($armor, true);
+        });
+
+        $this->info('Uploading Weapon Attachment Images...');
+        $this->withProgressBar(Attachment::all(), function (Attachment $armor) {
+            $this->work($armor, true);
+        });
 
         $this->info('Uploading Food Images...');
         $this->withProgressBar(Food::all(), function (Food $armor) {

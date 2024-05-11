@@ -23,7 +23,7 @@ class CreateWeaponAttachmentWikiPages extends AbstractCreateWikiPage
     protected $description = 'Create weapon attachments as wikipages';
 
     protected string $template = <<<'TEMPLATE'
-Das Item '''<ITEM NAME>''' ist ein Größe <ITEM SIZE> <ITEM TYPE> hergestellt von [[{{subst:MFURN|<MANUFACTURER CODE>}}]].<ref name="ig3221">{{Cite game|build=[[Star Citizen Alpha 3.22.1|Alpha 3.22.1]]|accessdate=<CURDATE>}}</ref>
+Das Item '''<ITEM NAME>''' ist ein Größe <ITEM SIZE> <ITEM TYPE> hergestellt von [[{{subst:MFURN|<MANUFACTURER CODE>}}]].<ref name="<REFNAME>">{{Cite game|build=[[Star Citizen Alpha <REFVERSION>|Alpha <REFVERSION>]]|accessdate=<CURDATE>}}</ref>
 == Beschreibung ==
 {{Item description}}
 == Erwerb ==
@@ -56,13 +56,15 @@ TEMPLATE;
     public function handle(): int
     {
         $this->withProgressBar(
-            Attachment::query()->whereIn('sub_type', [
-                'Magazine',
-                'Barrel',
-                'IronSight',
-                'Utility',
-                'BottomAttachment',
-            ])
+            Attachment::query()
+                ->where('sc_items.name', '<>', '<= PLACEHOLDER =>')
+                ->whereIn('sub_type', [
+                    'Magazine',
+                    'Barrel',
+                    'IronSight',
+                    'Utility',
+                    'BottomAttachment',
+                ])
                 ->get(),
             function (Attachment $item) {
                 $this->uploadWiki($item, 'Automatische Erstellung von Waffenbefestigungen');

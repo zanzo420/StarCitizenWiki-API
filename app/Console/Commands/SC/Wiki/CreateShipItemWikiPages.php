@@ -23,7 +23,7 @@ class CreateShipItemWikiPages extends AbstractCreateWikiPage
     protected $description = 'Create ship items as wikipages';
 
     protected string $template = <<<'TEMPLATE'
-Das Item '''<ITEM NAME>''' ist ein Größe <ITEM SIZE><ITEM GRADE><ITEM CLASS><ITEM TYPE> hergestellt von [[{{subst:MFURN|<MANUFACTURER CODE>}}]].<ref name="ig3221">{{Cite game|build=[[Star Citizen Alpha 3.22.1|Alpha 3.22.1]]|accessdate=<CURDATE>}}</ref>
+Das Item '''<ITEM NAME>''' ist ein Größe <ITEM SIZE><ITEM GRADE><ITEM CLASS><ITEM TYPE> hergestellt von [[{{subst:MFURN|<MANUFACTURER CODE>}}]].<ref name="<REFNAME>">{{Cite game|build=[[Star Citizen Alpha <REFVERSION>|Alpha <REFVERSION>]]|accessdate=<CURDATE>}}</ref>
 == Beschreibung ==
 {{Item description}}
 == Erwerb ==
@@ -68,6 +68,7 @@ TEMPLATE;
     {
         $this->withProgressBar(
             VehicleItem::query()
+                ->where('sc_items.name', '<>', '<= PLACEHOLDER =>')
                 ->whereIn('type', [
                     'BombLauncher',
                     'Cooler',

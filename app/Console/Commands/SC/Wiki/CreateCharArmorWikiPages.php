@@ -29,7 +29,7 @@ class CreateCharArmorWikiPages extends AbstractCreateWikiPage
     protected $description = 'Create char armor as wikipages';
 
     protected string $template = <<<'TEMPLATE'
-Das Item '''<ITEM NAME>''' ist ein <ARMOR CLASS> <ITEM TYPE> hergestellt von [[{{subst:MFURN|<MANUFACTURER CODE>}}]].<VARIANTINFO><ref name="ig3221">{{Cite game|build=[[Star Citizen Alpha 3.22.1|Alpha 3.22.1]]|accessdate=<CURDATE>}}</ref>
+Das Item '''<ITEM NAME>''' ist ein <ARMOR CLASS> <ITEM TYPE> hergestellt von [[{{subst:MFURN|<MANUFACTURER CODE>}}]].<VARIANTINFO><ref name="<REFNAME>">{{Cite game|build=[[Star Citizen Alpha <REFVERSION>|Alpha <REFVERSION>]]|accessdate=<CURDATE>}}</ref>
 == Beschreibung ==
 {{Item description}}
 == Itemports ==
@@ -131,7 +131,7 @@ TEMPLATE;
 
     protected static function getSuffix(Armor|Clothes $armor): ?string
     {
-        return match (true) {
+        $suffix = match (true) {
             str_contains($armor->class_name, '_hd_sec') => ' Hurston Security',
             str_contains($armor->class_name, '_irn') => ' Iron',
             str_contains($armor->class_name, '_gld') => ' Gold',
@@ -141,11 +141,19 @@ TEMPLATE;
             str_contains($armor->class_name, '_xenothreat') => ' (Xenothreat)',
             default => null
         };
+
+        if (! str_contains(strtolower($armor->name), strtolower(trim($suffix ?? '', ' ()')))) {
+            return $suffix;
+        }
+
+        return null;
     }
 
     protected function getPageName($model): string
     {
-        $name = $model->name.(self::getSuffix($model) ?? '');
+        $suffix = self::getSuffix($model) ?? '';
+
+        $name = $model->name.($suffix);
         if (str_contains($model->class_name, '_01_15') && str_contains($name, 'Black/Silver')) {
             $name = str_replace('Black', 'Tan', $name);
         }
@@ -153,6 +161,9 @@ TEMPLATE;
         if ($model->name === 'Venture Helmet White' && $model->class_name === 'rsi_explorer_armor_light_helmet_01_01_10') {
             $name = str_replace('White', 'White/Red', $name);
         }
+
+        $name = str_replace("$suffix$suffix", $suffix, $name);
+        $name = preg_replace('/^\s*-\s*/', '', $name);
 
         return $name;
     }
