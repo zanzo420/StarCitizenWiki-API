@@ -192,13 +192,6 @@ use OpenApi\Attributes as OA;
 )]
 class ItemResource extends AbstractTranslationResource
 {
-    private bool $onlySimpleData;
-
-    public function __construct($resource, bool $isVehicleItem = false, bool $onlyBaseData = false)
-    {
-        parent::__construct($resource);
-        $this->onlySimpleData = $onlyBaseData;
-    }
 
     public static function validIncludes(): array
     {
@@ -228,9 +221,7 @@ class ItemResource extends AbstractTranslationResource
                 'grade' => $vehicleItem->grade,
                 'class' => $vehicleItem->class,
             ]),
-            $this->mergeWhen(! $this->onlySimpleData, [
-                'description_data' => ItemDescriptionDataResource::collection($this->whenLoaded('descriptionData')),
-            ]),
+            'description_data' => ItemDescriptionDataResource::collection($this->whenLoaded('descriptionData')),
             'manufacturer_description' => $this->getDescriptionDatum('Manufacturer'),
             'manufacturer' => new ManufacturerLinkResource($this->manufacturer),
             'type' => $this->cleanType(),
@@ -238,9 +229,7 @@ class ItemResource extends AbstractTranslationResource
             $this->mergeWhen(...$this->addAttachmentPosition()),
             $this->mergeWhen($this->isTurret(), $this->addTurretData()),
             $this->mergeWhen(...$this->addSpecification()),
-            $this->mergeWhen(! $this->onlySimpleData, [
-                'dimension' => new ItemDimensionResource($this),
-            ]),
+            'dimension' => new ItemDimensionResource($this),
             $this->mergeWhen($this->container->exists, [
                 'inventory' => new ItemContainerResource($this->container),
             ]),
@@ -249,16 +238,16 @@ class ItemResource extends AbstractTranslationResource
             'entity_tags' => $this->entityTags->pluck('tag')->toArray(),
             'interactions' => $this->interactions->pluck('name')->toArray(),
             'ports' => ItemPortResource::collection($this->whenLoaded('ports')),
-            $this->mergeWhen(! $this->onlySimpleData && $this->relationLoaded('heatData'), [
+            $this->mergeWhen($this->relationLoaded('heatData'), [
                 'heat' => new ItemHeatDataResource($this->heatData),
             ]),
-            $this->mergeWhen(! $this->onlySimpleData && $this->relationLoaded('powerData'), [
+            $this->mergeWhen($this->relationLoaded('powerData'), [
                 'power' => new ItemPowerDataResource($this->powerData),
             ]),
-            $this->mergeWhen(! $this->onlySimpleData && $this->relationLoaded('distortionData'), [
+            $this->mergeWhen($this->relationLoaded('distortionData'), [
                 'distortion' => new ItemDistortionDataResource($this->distortionData),
             ]),
-            $this->mergeWhen(! $this->onlySimpleData && $this->relationLoaded('durabilityData'), [
+            $this->mergeWhen($this->relationLoaded('durabilityData'), [
                 'durability' => new ItemDurabilityDataResource($this->durabilityData),
             ]),
             $this->mergeWhen($this->type === 'WeaponAttachment', [
@@ -274,7 +263,7 @@ class ItemResource extends AbstractTranslationResource
         ];
     }
 
-    private function addSpecification(): array
+    protected function addSpecification(): array
     {
         $specification = $this?->specification;
         if (! $specification?->exists || $specification === null) {
@@ -400,7 +389,7 @@ class ItemResource extends AbstractTranslationResource
         };
     }
 
-    private function addTurretData(): array
+    protected function addTurretData(): array
     {
         $mountName = 'max_mounts';
         if ($this->type === 'MissileLauncher') {

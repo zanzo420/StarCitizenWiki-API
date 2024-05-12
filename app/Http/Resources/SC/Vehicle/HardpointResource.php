@@ -28,7 +28,7 @@ use OpenApi\Attributes as OA;
         ),
         new OA\Property(
             property: 'item',
-            ref: '#/components/schemas/item_v2',
+            ref: '#/components/schemas/hardpoint_item_v2',
             type: 'double',
             nullable: true
         ),
@@ -80,16 +80,11 @@ class HardpointResource extends AbstractBaseResource
 
     private function addItem(): array
     {
-        if ($this->vehicleItem->exists) {
-            return [true, ['item' => new ItemResource($this->item, true, true)]];
-        }
-
-        if ($this->item !== null && ($this->item->isTurret() || $this->item->type === 'Cargo')) {
-            return [true, ['item' => new ItemResource($this->item, true, true)]];
-        }
-
-        if ($this->item !== null && $this->item->exists) {
-            return [true, ['item' => new ItemResource($this->item, false, true)]];
+        if (
+            $this->vehicleItem->exists ||
+            ($this->item !== null && ($this->item->exists || $this->item->isTurret() || $this->item->type === 'Cargo'))
+        ) {
+            return [true, ['item' => new HardpointItemResource($this->item)]];
         }
 
         return [false, []];
