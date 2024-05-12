@@ -134,11 +134,8 @@ class VehicleResource extends AbstractBaseResource
 
     /**
      * Transform the resource into an array.
-     *
-     * @param Request $request
-     * @return array
      */
-    public function toArray($request): array
+    public function toArray(Request $request): array
     {
         $includes = collect(explode(',', $request->get('include', '')))
             ->map('trim')
@@ -151,9 +148,9 @@ class VehicleResource extends AbstractBaseResource
             'name' => $this->name,
             'slug' => $this->slug,
             'sizes' => [
-                'length' => (double)$this->length,
-                'beam' => (double)$this->width,
-                'height' => (double)$this->height,
+                'length' => (float) $this->length,
+                'beam' => (float) $this->width,
+                'height' => (float) $this->height,
             ],
             'mass' => $this->mass,
             'cargo_capacity' => $this->cargo_capacity,

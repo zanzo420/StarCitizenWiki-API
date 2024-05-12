@@ -9,6 +9,8 @@ use App\Http\Resources\SC\ItemSpecification\ArmorResource;
 use App\Http\Resources\SC\Shop\ShopResource;
 use App\Http\Resources\TranslationResourceFactory;
 use App\Models\System\Language;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use OpenApi\Attributes as OA;
@@ -269,6 +271,41 @@ class VehicleResource extends AbstractBaseResource
             ->map('strtolower')
             ->toArray();
 
+        $hardpoints = [];
+
+        if (in_array('hardpoints', $includes, true)) {
+            if ($request->has('filter') && isset($request->get('filter')['hardpoints'])) {
+                /** @var HasMany $hardpoints */
+                $hardpoints = $this->hardpointsWithoutParent();
+
+                $filters = collect(explode(',', $request->get('filter')['hardpoints']))
+                    ->map(fn (string $filter) => trim($filter));
+
+                $remove = $filters
+                    ->filter(fn (string $filter) => str_starts_with($filter, '!'))
+                    ->map(fn (string $filter) => ltrim($filter, '!'))
+                    ->toArray();
+
+                $include = $filters
+                    ->filter(fn (string $filter) => ! str_starts_with($filter, '!'))
+                    ->toArray();
+
+                if (! empty($remove)) {
+                    $hardpoints->whereRelation('item', function (Builder $query) use ($remove) {
+                        $query->whereNotIn('type', $remove);
+                    });
+                } elseif (! empty($include)) {
+                    $hardpoints->whereRelation('item', function (Builder $query) use ($include) {
+                        $query->whereIn('type', $include);
+                    });
+                }
+
+                $hardpoints = $hardpoints->get();
+            } else {
+                $hardpoints = $this->hardpointsWithoutParent;
+            }
+        }
+
         $manufacturer = $this->item->manufacturer->name;
         if ($manufacturer === 'Unknown Manufacturer') {
             $manufacturer = $this->description_manufacturer;
@@ -371,7 +408,7 @@ class VehicleResource extends AbstractBaseResource
                 'expedite_cost' => $this->expedite_cost,
             ],
             $this->mergeWhen(in_array('hardpoints', $includes, true), [
-                'hardpoints' => HardpointResource::collection($this->hardpointsWithoutParent),
+                'hardpoints' => HardpointResource::collection($hardpoints),
             ]),
             $this->mergeWhen(in_array('shops', $includes, true), [
                 'shops' => ShopResource::collection($this->item->shops),
