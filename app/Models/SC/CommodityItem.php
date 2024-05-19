@@ -44,7 +44,7 @@ abstract class CommodityItem extends HasTranslations
 
     public function item(): BelongsTo
     {
-        return $this->belongsTo(Item::class, 'item_uuid', 'uuid');
+        return $this->belongsTo(Item::class, 'item_uuid', 'uuid')->withoutGlobalScopes();
     }
 
     public function getNameAttribute()

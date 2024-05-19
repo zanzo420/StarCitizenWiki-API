@@ -276,8 +276,9 @@ class Vehicle extends HasTranslations implements HasChangelogsInterface
         return $this->hasOne(
             \App\Models\SC\Vehicle\Vehicle::class,
             'shipmatrix_id',
-            'id'
+            'id',
         )
+            ->withoutGlobalScopes()
             ->withDefault();
     }
 

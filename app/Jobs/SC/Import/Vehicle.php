@@ -6,7 +6,6 @@ namespace App\Jobs\SC\Import;
 
 use App\Models\SC\Manufacturer;
 use App\Models\SC\Vehicle\Hardpoint;
-use App\Services\Parser\SC\Labels;
 use App\Services\Parser\SC\Manufacturers;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
@@ -56,9 +55,9 @@ class Vehicle implements ShouldQueue
         $vehicle = $this->shipData;
 
         try {
-            $rawData = File::get($vehicle['filePathV2']);
+            $rawData = File::get($vehicle['filePathRaw']);
 
-            $vehicle['rawData'] = json_decode($rawData, true, 512, JSON_THROW_ON_ERROR);
+            $vehicle['rawData'] = json_decode($rawData, true, 512, JSON_THROW_ON_ERROR)['Raw'];
         } catch (FileNotFoundException|JsonException $e) {
             $this->fail($e->getMessage());
         }
@@ -74,7 +73,7 @@ class Vehicle implements ShouldQueue
 
         if (! $vehicleModel->item === null || ! optional($vehicleModel->item)->exists) {
             $itemParser = new \App\Services\Parser\SC\Item(
-                $vehicle['filePath'],
+                $vehicle['filePathRaw'],
                 $manufacturers
             );
 
@@ -277,12 +276,13 @@ class Vehicle implements ShouldQueue
         return $negation * floor((abs((float) $num) * $coefficient)) / $coefficient;
     }
 
-    private function getItemUUID(string $className): ?string
+    private function getItem(string $search): ?\App\Models\SC\Item\Item
     {
         return \App\Models\SC\Item\Item::query()
             ->withoutGlobalScopes()
-            ->where('class_name', strtolower($className))
-            ->first(['uuid'])->uuid ?? null;
+            ->where('uuid', $search)
+            ->orWhere('class_name', strtolower($search))
+            ->first();
     }
 
     /**
@@ -308,21 +308,24 @@ class Vehicle implements ShouldQueue
             ->each(function (Collection $entries) use ($hardpoints, $vehicle) {
                 $entries
                     ->each(function ($hardpoint) use ($hardpoints, $vehicle) {
-                        $itemUuid = null;
-                        if (! empty($hardpoint['entityClassName'])) {
-                            $itemUuid = $this->getItemUUID($hardpoint['entityClassName']);
+                        $item = null;
+                        if (! empty($hardpoint['entityClassReference']) && $hardpoint['entityClassReference'] !== '00000000-0000-0000-0000-000000000000') {
+                            $item = $this->getItem($hardpoint['entityClassReference']);
+                        } elseif (! empty($hardpoint['entityClassName'])) {
+                            $item = $this->getItem($hardpoint['entityClassName']);
                         }
 
                         $itemPortName = strtolower($hardpoint['itemPortName']);
                         $this->hardpoints->push($hardpoint['itemPortName']);
 
+                        /** @var Hardpoint $point */
                         $point = $vehicle->hardpoints()->updateOrCreate([
                             'hardpoint_name' => $hardpoint['itemPortName'],
                         ], [
-                            'class_name' => $hardpoint['entityClassName'],
-                            'equipped_item_uuid' => $itemUuid,
-                            'min_size' => $hardpoints[$itemPortName]['ItemPort']['minsize'] ?? null,
-                            'max_size' => $hardpoints[$itemPortName]['ItemPort']['maxsize'] ?? null,
+                            'class_name' => $item?->class_name ?? $hardpoint['entityClassName'] ?? null,
+                            'equipped_item_uuid' => $item?->uuid ?? $hardpoint['entityClassReference'] ?? null,
+                            'min_size' => $hardpoints[$itemPortName]['ItemPort']['minSize'] ?? null,
+                            'max_size' => $hardpoints[$itemPortName]['ItemPort']['maxSize'] ?? null,
                         ]);
 
                         $this->createSubPoint(
@@ -360,7 +363,7 @@ class Vehicle implements ShouldQueue
                 return $hardpoint['class'] === 'ItemPort';
             })
             ->filter(function (array $hardpoint) {
-                return isset($hardpoint['ItemPort']) && ! empty($hardpoint['ItemPort']['flags']) && $hardpoint['ItemPort']['minsize'] > 0;
+                return isset($hardpoint['ItemPort']) && ! empty($hardpoint['ItemPort']['flags']) && $hardpoint['ItemPort']['minSize'] > 0;
             })
             ->filter(function (array $hardpoint) {
                 // Filter out some
@@ -390,8 +393,8 @@ class Vehicle implements ShouldQueue
                 }
 
                 $vehicle->hardpoints()->updateOrCreate($where, [
-                    'min_size' => Arr::get($hardpoint, 'ItemPort.minsize'),
-                    'max_size' => Arr::get($hardpoint, 'ItemPort.maxsize'),
+                    'min_size' => Arr::get($hardpoint, 'ItemPort.minSize'),
+                    'max_size' => Arr::get($hardpoint, 'ItemPort.maxSize'),
                 ]);
 
                 $this->hardpoints->push($hardpoint['name']);
@@ -429,17 +432,19 @@ class Vehicle implements ShouldQueue
     private function createSubPoint(array $entries, Hardpoint $parent, \App\Models\SC\Vehicle\Vehicle $vehicle): void
     {
         foreach ($entries as $subPoint) {
-            if (empty($subPoint['entityClassName'])) {
+            if (empty($subPoint['entityClassName']) && empty($subPoint['entityClassReference'])) {
                 continue;
             }
+
+            $item = $this->getItem($subPoint['entityClassReference']) ?? $this->getItem($subPoint['entityClassName']);
 
             $this->hardpoints->push($subPoint['itemPortName']);
             $point = $vehicle->hardpoints()->updateOrCreate([
                 'hardpoint_name' => $subPoint['itemPortName'],
                 'parent_hardpoint_id' => $parent->id,
             ], [
-                'class_name' => $subPoint['entityClassName'],
-                'equipped_item_uuid' => $this->getItemUUID($subPoint['entityClassName']),
+                'class_name' => $item?->class_name ?? $subPoint['entityClassName'],
+                'equipped_item_uuid' => $item?->uuid,
             ]);
 
             $subEntries = Arr::get($subPoint, 'loadout.SItemPortLoadoutManualParams.entries');

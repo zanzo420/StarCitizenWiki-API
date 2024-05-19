@@ -29,7 +29,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(
             property: 'item',
             ref: '#/components/schemas/hardpoint_item_v2',
-            type: 'double',
+            type: 'object',
             nullable: true
         ),
     ],
